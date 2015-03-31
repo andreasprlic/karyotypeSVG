@@ -14,7 +14,7 @@
     <script src='js/vendor/bootstrap-3.3.4.min.js'></script>
 
     <!-- see demo.js for how to instanciate a karyotype view -->
-    <script data-main='demo' src='js/vendor/require.js' ></script>
+    <script data-main='showAllChromosomes' src='js/vendor/require.js' ></script>
 
 </head>
 
@@ -23,13 +23,22 @@
  <div class="container">
 	<div class="jumbotron">
 
-	<h1>KaryotypeSVG Show aLl Chromosomes</h1>
+	<h1>KaryotypeSVG Show all Chromosomes</h1>
 	</div>
+	
 
-	<div id="karyotypeView"></div>
+<div class="panel panel-default">
+  <div class="panel-body">
+	<div id="ktContainer">
+	<div>
+</div>
 </div>
 
+
 <script>
+
+
+
 
     $(function() { $("[data-toggle='tooltip']").tooltip();});
 

@@ -8,6 +8,50 @@ define(function()
 
     var attr_name_cache = {};
 
+
+    exports.indexOf = function(needle) {
+    
+    var indexOf;
+
+    if(typeof Array.prototype.indexOf === 'function') {
+        indexOf = Array.prototype.indexOf;
+    } else {
+        indexOf = function(needle) {
+            var i = -1, index = -1;            
+            for(i = 0; i < this.length; i++) {
+                if(this[i] === needle) {
+                    index = i;
+                    break;
+                }
+            }
+
+            return index;
+        };
+    }
+
+    return indexOf.call(this, needle);
+};
+
+
+    exports.isNumber = function(n){
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    };
+
+    var reA = /[^a-zA-Z]/g;
+    var reN = /[^0-9]/g;
+    
+    exports.sortAlphaNum = function(a,b) {
+        var aA = a.replace(reA, "");
+        var bA = b.replace(reA, "");
+        if(aA === bA) {
+            var aN = parseInt(a.replace(reN, ""), 10);
+            var bN = parseInt(b.replace(reN, ""), 10);
+            return aN === bN ? 0 : aN > bN ? 1 : -1;
+        } else {
+            return aA > bA ? 1 : -1;
+        }
+    };
+
     exports.setAttr = function(node, key, value) {
         var attr = attr_name_cache[key];
         if (!attr) {

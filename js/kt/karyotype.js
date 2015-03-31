@@ -49,6 +49,7 @@ define(
             this._initialized = false;
             this.listenerMap = {};
             this.karyos = [];
+            this.scale = 1;
 
             this.chrLen = 1;
             this.start = 0;
@@ -65,14 +66,26 @@ define(
             this.resetSVG();
 
             var that = this;
-            $(window).resize(function () {
+
+            function onResize() {
+                
 
                 $(parent).css('overflow', 'hidden');
                 $(parent).css('width', 'auto');
-                $(this.realParent).css('overflow', 'hidden');
-                $(this.realParent).css('width', 'auto');
+                $(that.realParent).css('overflow', 'hidden');
+                $(that.realParent).css('width', 'auto');
                 that.updateScale();
                 that.redraw();
+            }
+
+            var resizeTimer = false;
+
+            $(window).resize(function () {
+                if ( resizeTimer )  {
+                 clearTimeout(resizeTimer);
+                }
+                resizeTimer = setTimeout(onResize, 300);
+                
             });
         }
 
@@ -185,7 +198,7 @@ define(
                 }
 
                 var d = data[i].split(/[\t]+/);
-                console.log(d);
+
                 this.bands.push(d);
             }
 
@@ -196,8 +209,13 @@ define(
             }
         };
 
-        Karyotype.prototype.getData = function(){
+        Karyotype.prototype.getBands = function(){
             return this.bands;
+        };
+
+        Karyotype.prototype.setBands = function(bands){
+            this.bands = bands;
+            this._initialized = true;
         };
 
 
@@ -206,10 +224,8 @@ define(
             this.start = start;
             this.end = end;
             
-            console.log(this.chr + " " + chr);
-
             if (!this.chr || chr !== this.chr) {
-                console.log("new chromosome selected! " + chr + " old: " + this.chr);
+                
                 this.chr = chr;
                 
                 //util.removeChildren(this.svg);
@@ -223,7 +239,6 @@ define(
                     //console.log(bands[i][0] + " " + chr);
                     if ( this.bands[i][0] === chr){
                         
-
                         var elem = this.bands[i];
 
                         //var chr=elem[0];
@@ -257,9 +272,84 @@ define(
             }
         };
 
+        Karyotype.prototype.getChromosomeList = function(){
+
+            var chromosomes = [];
+            var data = this.getBands();
+              for(var i = 0; i < data.length; i++){
+                //console.log(data[i]);
+
+                var chr = data[i][0];
+
+                if ( chr.startsWith("#") ) {
+                    continue;
+                }
+
+                // skip alternatives
+                // if ( chr.indexOf('_')  > -1) {
+                //     continue;
+                // }
+
+                // skip empty lines
+                if ( chr.length < 3) {
+                    continue;
+                }
+
+               
+                if ( util.indexOf.call(chromosomes,chr) < 0){
+                    chromosomes.push(chr);
+                }
+
+            }
+            
+            return chromosomes.sort(util.sortAlphaNum);
+        };
+
+        Karyotype.prototype.getChromosomeSizes = function() {
+            var size={};
+             var data = this.getBands();
+             for(var i = 0; i < data.length; i++){
+
+               
+                var chr = data[i][0];
+                
+                if ( chr.startsWith("#") ) {
+                    continue;
+                }
+
+                // skip alternatives
+                // if ( chr.indexOf('_')  > -1) {
+                //     continue;
+                // }
+
+                // skip empty lines
+                if ( chr.length < 3) {
+                    continue;
+                }
+
+                var max = parseInt(data[i][2]);
+
+                if ( typeof size[chr] === 'undefined'){
+                    
+
+                    size[chr] = max; 
+                } else {
+                    if ( max > size[chr]) {
+                        
+                        size[chr] = max;
+                    }
+                }
+
+             }
+
+             return size;
+
+        };
+
+
         Karyotype.prototype.createGradient = function(i,col){
             var gradient = util.makeElementNS(NS_SVG, 'linearGradient', null, {
-                id: 'myGradient' + i,
+                id: 'myGradient' + this.chr + '_' + i,
                 x1: 0,
                 y1: 0,
                 x2: 0,
@@ -270,7 +360,7 @@ define(
             // and now the stops..
 
             var stop1 = util.makeElementNS(NS_SVG, 'stop', null, {
-                id: 'start' + i,
+                id: 'start' + this.chr + '_' + i,
                 'offset':     '50%',
                 'stop-color': col
             });
@@ -278,7 +368,7 @@ define(
             gradient.appendChild(stop1);
 
             var stop2 = util.makeElementNS(NS_SVG, 'stop', null, {
-                id: 'stop' + i,
+                id: 'stop' + this.chr + '_' +i,
                 'offset':    '100%',
                 'stop-color': 'grey'
             });
@@ -481,7 +571,7 @@ define(
 
                         this.createGradient(i,col);
 
-                        var fill = 'url(#myGradient'+i+')';
+                        var fill = 'url(#myGradient'+ this.chr + '_'  + i+')';
 
                         var box;
                         if ( i === 0 ) {
@@ -618,7 +708,7 @@ define(
 
 
             this.thumb = util.makeElementNS(NS_SVG, 'rect', null, {
-                id:'thumb',
+                id:'thumb' + this.chr,
                 x: 50,
                 y: -5,
                 width: 5,
@@ -698,11 +788,44 @@ define(
             }
         };
 
+        /** allows to set the scale of this karyotype image. This can be used when showing 
+            multiple karyotypes on the same page.
+
+            Chr1 would be 100% of the scale, and each other chromosome can get scaled 
+            down relative to its size.
+
+            Percent is a number between 0 and 1;
+        */
+        Karyotype.prototype.setScale = function(percent){
+
+            if ( percent < 0) {
+                console.error("scale has to be a value between 0 and 1");
+                percent = 1;
+            }
+
+            if ( percent > 1) {
+                console.error("scale has to be a value between 0 and 1");
+                // prob a user input error
+                if ( percent <=100) {
+                    percent = percent / 100;
+                } else {
+
+                    percent = 1;
+                }
+            }
+
+            this.scale = percent;
+
+        };
+
         Karyotype.prototype.updateScale = function () {
 
             var availWidth = this.getPreferredWidth();
+            if ( availWidth < 2) {
+                return;
+            }
 
-            this.width = availWidth;
+            this.width = availWidth * this.scale;
 
             //$(this.parent).css('overflow', 'auto');
             //$(this.parent).css('width', $(this.realParent).width());
