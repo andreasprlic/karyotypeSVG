@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>KaryotypeSVG demo file</title>
+
+ 	<!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- this example demonstrates how to run karyotypesvg using require.js !-->
+    <script src='js/vendor/jquery-2.0.2.min.js'></script>
+    <script src='js/vendor/bootstrap-3.3.4.min.js'></script>
+
+    <!-- see demo.js for how to instanciate a karyotype view -->
+    <script data-main='demo' src='js/vendor/require.js' ></script>
+
+</head>
+
+<body>
+
+ <div class="container">
+	<div class="jumbotron">
+
+	<h1>KaryotypeSVG demo Chromosome 1</h1>
+	</div>
+
+	<div id="karyotypeView"></div>
+</div>
+
+<script>
+
+    $(function() { $("[data-toggle='tooltip']").tooltip();});
+
+</script>
+</body>
+</html>
