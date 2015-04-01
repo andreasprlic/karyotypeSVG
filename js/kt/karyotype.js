@@ -32,7 +32,9 @@ define(
             gpos: 'rgb(0,0,0)',
             gvar: 'rgb(100,100,100)',
             acen: colors.forceHex('red'),
-            stalk: 'rgb(100,100,100)'
+            stalk: 'rgb(100,100,100)',
+            gradient : 'rgb(128,128,128)',
+            border : 'black'
         };
 
         var thumbColor = 'rgb(50, 88, 128)';
@@ -229,8 +231,8 @@ define(
                 
                 this.chr = chr;
                 
-                //util.removeChildren(this.svg);
-                $(this.svg).empty();
+                util.removeChildren(this.svg);
+                //$(this.svg).empty();
                 
                 this.karyos = [];
                 
@@ -269,6 +271,7 @@ define(
             } 
 
             if ( this._initialized) {
+
                 this.setThumb();
             }
         };
@@ -371,11 +374,11 @@ define(
             var stop2 = util.makeElementNS(NS_SVG, 'stop', null, {
                 id: 'stop' + this.chr + '_' +i,
                 'offset':    '100%',
-                'stop-color': 'grey'
+                'stop-color': karyo_palette.gradient
             });
 
             gradient.appendChild(stop2);
-
+                    
             var defs = util.makeElementNS(NS_SVG, 'defs');
 
             defs.appendChild(gradient);
@@ -404,7 +407,7 @@ define(
                 height: trackHeight,
                 fill: fill,
                 //fill:col,
-                stroke: k.label === 'acen' ? col : 'black',
+                stroke: k.label === 'acen' ? col : karyo_palette.border,
                 strokewidth: 1
 
             });
@@ -446,7 +449,7 @@ define(
                 k.label === 'acen' ? 5 : this.trackHeigth),
                 fill: fill,
                 //fill:col,
-                stroke: k.label === 'acen' ? col : 'black',
+                stroke: k.label === 'acen' ? col : karyo_palette.border,
                 strokewidth: 1
 
             });
@@ -477,7 +480,7 @@ define(
                 height: (k.label === 'stalk' ||
                 k.label === 'acen' ? 5 : this.trackHeigth),
                 fill: fill,
-                stroke: k.label === 'acen' ? col : 'black',
+                stroke: k.label === 'acen' ? col : karyo_palette.border,
                 strokewidth: 1
 
 
@@ -626,52 +629,14 @@ define(
                 }
             }
 
-            if (bandspans) {
-                //this.drawBandSpans2(bandspans);
-            }
+           
 
 
             this.initThumb();            
 
         };
 
-        Karyotype.prototype.drawBandSpans = function(bandspans){
-
-            var r = bandspans.ranges();
-
-            var pathopsT = 'M 0 10 L 0 0';
-            var pathopsB = 'M 0 5 L 0 15';
-
-            var curx = 0;
-            for (var ri = 0; ri < r.length; ++ri) {
-                var rr = r[ri];
-                var bmin = ((1.0 * rr.min()) / this.chrLen) * this.width;
-                var bmax = ((1.0 * rr.max()) / this.chrLen) * this.width;
-                if ((bmin - curx > 0.75)) {
-                    pathopsT += ' M ' + bmin + ' 0';
-                    pathopsB += ' M ' + bmin + ' 15';
-                }
-                pathopsT +=  ' L ' + bmax + ' 0';
-                pathopsB +=  ' L ' + bmax + ' 15';
-                curx = bmax;
-            }
-            if ((this.width - curx) > 0.75) {
-                pathopsT += ' M ' + this.width + ' 0';
-                pathopsB += ' M ' + this.width + ' 15';
-            } else {
-                pathopsT += ' L ' + this.width + ' 0';
-                pathopsB += ' L ' + this.width + ' 15';
-            }
-            pathopsT +=  ' L ' + this.width + ' 10';
-            pathopsB +=  ' L ' + this.width + ' 5';
-            this.svg.appendChild(util.makeElementNS(NS_SVG, 'path', null, {
-                d: pathopsT + ' ' + pathopsB,
-                stroke: 'black',
-                strokeWidth: 1,
-                fill: 'blue'
-            }));
-        };
-
+       
         Karyotype.prototype.createBandClickedEvent = function(k){
             var that = this;
             return function (event ) {
@@ -773,13 +738,19 @@ define(
 
         };
 
+        /** enable/disable the display of the "thumb", which displays a currently selected region.
+        */
         Karyotype.prototype.showThumb = function(flag) {
+
             this.thumbEnabled = flag;
+
         };
 
+        /** update the position of the "thumb".
+        */
         Karyotype.prototype.setThumb = function() {
 
-            if ( this.thumbEnabled){
+            if ( ! this.thumbEnabled){
                 return;
             }
 
@@ -791,6 +762,8 @@ define(
             if ( width < 5) {
                 width = 5;
             }
+
+            console.log("gpos: " + gpos);
 
             if (this.thumb) {
                 this.thumb.setAttribute('x', gpos );
