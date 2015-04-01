@@ -12,7 +12,6 @@
 
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-    
 
     <script src='js/vendor/jquery-2.0.2.min.js'></script>
     <script src='js/vendor/bootstrap-3.3.4.min.js'></script>
@@ -20,7 +19,7 @@
 
 </head>
 <body>
- <div class="container">
+ <div class="container-fluid">
     <div class="jumbotron">
 
     <h1>KaryotypeSVG demo 2</h1>
@@ -38,7 +37,6 @@
     </div>
 
     <p />
-
 
     <!-- The actual SVG graphics will be in this container -->
     <div id="karyotypeView"></div>
@@ -61,6 +59,8 @@
             var kt = new karyotypesvg.Karyotype();
 
             kt.init();
+
+            kt.showThumb(false);
 
             kt.setParent("#karyotypeView");
 
@@ -94,17 +94,16 @@
     $(function() { $("[data-toggle='tooltip']").tooltip();});
 
 
-
 function updateUI(kt){
 
         // add a dropdown that allows to switch between chromosomes.
 
-        var bands = kt.getData();
+        var chromosomes = kt.getChromosomeList();
 
         var chr = "";
-        for ( var i = 0 ; i< bands.length ; i++){
+        for ( var i = 0 ; i< chromosomes.length ; i++){
             //console.log(bands[i]);
-            var currentChr = bands[i][0];
+            var currentChr = chromosomes[i];
             if ( currentChr !== chr){
                 // add a new dropdown;
                 
