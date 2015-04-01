@@ -583,8 +583,12 @@ define(
                             box = this.createBox(k, bmin, bmax, col, fill);
                         }
 
+                        var chrNr = "";
+                        if (this.chr.startsWith("chr")) {
+                            chrNr = this.chr.substring(3);
+                        }
                         $(box).tooltip({
-                            'title':k.id + ' ' +
+                            'title':chrNr + k.id + ' ' + k.label + ' ' +
                             this.numberWithCommas(k.min) + ' - ' +
                             this.numberWithCommas(k.max),
                             'container':'body'
