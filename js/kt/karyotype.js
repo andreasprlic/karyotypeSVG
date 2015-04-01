@@ -631,9 +631,6 @@ define(
 
         };
 
-
-
-
         Karyotype.prototype.drawBandSpans = function(bandspans){
 
             var r = bandspans.ranges();
