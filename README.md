@@ -11,6 +11,6 @@ The code is derived from Thomas Down's original [karyoscape code](https://github
 
 More examples are available after a checkout from 
  - [index.html](index.html) shows how to create an ideogram using require.js
- - [index1.html](index1.html) shows how to add some customizations
- - [index2.html](index2.html) shows how to show an ideogram for each human chromosome
+ - [index2.html](index2.html) shows how to add some customizations
+ - [index3.html](index3.html) shows how to show an ideogram for each human chromosome
 
