@@ -55,6 +55,7 @@ define(
             this.start = 0;
             this.end = 1;
             this.bands = [];
+            this.thumbEnabled = true;
 
             this.realParent = "";
             this.parent = "";
@@ -706,6 +707,9 @@ define(
 
         Karyotype.prototype.initThumb = function() {
 
+            if ( ! this.thumbEnabled){
+                return;
+            }
 
             this.thumb = util.makeElementNS(NS_SVG, 'rect', null, {
                 id:'thumb' + this.chr,
@@ -768,8 +772,15 @@ define(
 
         };
 
+        Karyotype.prototype.showThumb = function(flag) {
+            this.thumbEnabled = flag;
+        };
+
         Karyotype.prototype.setThumb = function() {
 
+            if ( this.thumbEnabled){
+                return;
+            }
 
             var pos = (this.start|0) ;
             var gpos = ((1.0 * pos)/this.chrLen) * this.width;

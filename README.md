@@ -1,6 +1,12 @@
 # karyotypeSVG
 
 
-This project is based on Thomas Down's original [karyoscape code](https://github.com/dasmoth/dalliance/blob/0.7.x/js/karyoscape.js). 
+This project allows to draw an SVG graphics showing one (or multiple) ideaograms of karyotypes (cytobands) of a chromosome.
 
-It draws an SVG graphics showing the karyotype (cytobands) of a chromosome.
+The code is derived from Thomas Down's original [karyoscape code](https://github.com/dasmoth/dalliance/blob/0.7.x/js/karyoscape.js). 
+
+## Example
+
+<img src="img/example.png"/>
+
+

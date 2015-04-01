@@ -50,7 +50,7 @@ define("vendor/require.js", function(){});
 
 define('spans',[],function() {
 
-    
+    "use strict";
     var exports = {};
 
     function Range(min, max)
@@ -450,7 +450,7 @@ define('util',[],function()
 define('colors',[],function()
 {
 
-    
+    "use strict";
 
     var exports = {};
 
@@ -630,7 +630,7 @@ define(
     ],
     function(spans, util,colors) {
 
-        
+        "use strict";
         var NS_SVG = 'http://www.w3.org/2000/svg';
 
         var dataLocation =
@@ -670,6 +670,7 @@ define(
             this.start = 0;
             this.end = 1;
             this.bands = [];
+            this.thumbEnabled = true;
 
             this.realParent = "";
             this.parent = "";
@@ -1321,6 +1322,9 @@ define(
 
         Karyotype.prototype.initThumb = function() {
 
+            if ( ! this.thumbEnabled){
+                return;
+            }
 
             this.thumb = util.makeElementNS(NS_SVG, 'rect', null, {
                 id:'thumb' + this.chr,
@@ -1383,8 +1387,15 @@ define(
 
         };
 
+        Karyotype.prototype.showThumb = function(flag) {
+            this.thumbEnabled = flag;
+        };
+
         Karyotype.prototype.setThumb = function() {
 
+            if ( this.thumbEnabled){
+                return;
+            }
 
             var pos = (this.start|0) ;
             var gpos = ((1.0 * pos)/this.chrLen) * this.width;

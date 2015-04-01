@@ -92,6 +92,8 @@ require(['kt/main','kt/util'], function(KT, util){
 
  		newkt.setScale(percent);
 
+ 		newkt.showThumb(false);
+
 		// no need to re-load...
  		newkt.setBands(kt.getBands());
 
