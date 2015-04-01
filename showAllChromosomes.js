@@ -12,6 +12,7 @@ requirejs.config({
 });
 
 var karyotypesvg ;
+var kts = [];
 
 require(['kt/main','kt/util'], function(KT, util){
 
@@ -51,6 +52,7 @@ require(['kt/main','kt/util'], function(KT, util){
 
 			console.log("longest chromosome : " + maxChromosome + " length: " + maxChromosomeLength);
 
+
 			for (var i = 0 ; i < chromosomes.length ; i++){
 
 				// we skip the alternatives...
@@ -65,7 +67,12 @@ require(['kt/main','kt/util'], function(KT, util){
 				var chrLen = sizes[chromosomes[i]];
 
 				var percent = chrLen / maxChromosomeLength;
-				addNewKaryotypeView(kt,chromosomes[i],percent);
+
+				var newkt = addNewKaryotypeView(kt,chromosomes[i],percent);
+
+				kts.push(newkt);
+
+
 
 			}
 
@@ -76,6 +83,14 @@ require(['kt/main','kt/util'], function(KT, util){
         
 
     });
+
+	function disableAllThumbs(){
+		for (var i = 0 ; i < kts.length ; i++){
+			var kt = kts[i];
+			kt.showThumb(false);
+
+		}
+	}
 
     function addNewKaryotypeView(kt, chr, percent){
     	//console.log("adding new chromosome " + chr + " " + percent);
@@ -99,6 +114,19 @@ require(['kt/main','kt/util'], function(KT, util){
 
 		newkt.update(chr) ;   	
 		newkt.updateScale(chr);
+
+		newkt.addListener('bandClicked',function(event){
+			console.log(event);
+
+			disableAllThumbs();
+
+			newkt.showThumb(true);
+
+			newkt.update(newkt.getChr(),event.min, event.max);
+
+		});
+
+		return newkt;
     }
 
 });

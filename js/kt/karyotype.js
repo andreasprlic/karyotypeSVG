@@ -166,6 +166,12 @@ define(
             return this.chrLen;
         };
 
+        Karyotype.prototype.getChr = function(){
+
+            return this.chr;
+        };
+
+
         Karyotype.prototype.getWidth = function(){
 
             return this.width;
@@ -610,10 +616,6 @@ define(
                             }
                         }
 
-                        //util.makeTooltip(box, k.id, this.hPopupHolder);
-
-                         
-
 
                         var bandClickedEventFunction = this.createBandClickedEvent(k);
 
@@ -743,6 +745,17 @@ define(
         Karyotype.prototype.showThumb = function(flag) {
 
             this.thumbEnabled = flag;
+            
+            if (flag && ( ! this.thumb)) {
+                this.initThumb();
+            }
+
+            if ( ! flag && this.thumb){
+                this.svg.removeChild(this.thumb);
+                this.thumb = undefined;
+
+
+            }
 
         };
 
@@ -754,22 +767,28 @@ define(
                 return;
             }
 
-            var pos = (this.start|0) ;
-            var gpos = ((1.0 * pos)/this.chrLen) * this.width;
-
-            var width = (this.end - this.start) / this.chrLen * this.width;
-
-            if ( width < 5) {
-                width = 5;
+            if ( ! this._initialized) {
+                return;
             }
 
-            console.log("gpos: " + gpos);
+            var pos = (this.start|0) ;
+            
+            var gpos = Math.round(((1.0 * pos)/this.chrLen) * this.width);
 
+            var w = Math.round((this.end|0 - this.start|0) / this.chrLen * this.width);
+
+            if ( w < 5) {
+                w = 5;
+            }
+
+            console.log("setThumb: " + gpos + " " + w + " tw: " + this.width + " chrlen " +
+                        this.chrLen  + " start " + this.start + " this.thumb: " + this.thumb);
             if (this.thumb) {
+                 
                 this.thumb.setAttribute('x', gpos );
-                if ( width > 0) {
-                    this.thumb.setAttribute('width', width);
-                }
+              
+                this.thumb.setAttribute('width', w);
+                
             }
         };
 
