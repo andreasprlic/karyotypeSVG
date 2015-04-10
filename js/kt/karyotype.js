@@ -38,6 +38,7 @@ define(
         };
 
         var thumbColor = 'rgb(50, 88, 128)';
+       
 
         function Karyotype()
         {
@@ -597,7 +598,7 @@ define(
                             chrNr = this.chr.substring(3);
                         }
                         $(box).tooltip({
-                            'title':chrNr + k.id + ' ' + k.label + ' ' +
+                            'title':chrNr + k.id + ' ' + 
                             this.numberWithCommas(k.min) + ' - ' +
                             this.numberWithCommas(k.max),
                             'container':'body'
@@ -630,9 +631,6 @@ define(
                     }
                 }
             }
-
-           
-
 
             this.initThumb();            
 
@@ -745,7 +743,7 @@ define(
         Karyotype.prototype.showThumb = function(flag) {
 
             this.thumbEnabled = flag;
-            
+
             if (flag && ( ! this.thumb)) {
                 this.initThumb();
             }
@@ -781,8 +779,8 @@ define(
                 w = 5;
             }
 
-            console.log("setThumb: " + gpos + " " + w + " tw: " + this.width + " chrlen " +
-                        this.chrLen  + " start " + this.start + " this.thumb: " + this.thumb);
+            // console.log("setThumb: " + gpos + " " + w + " tw: " + this.width + " chrlen " +
+            //             this.chrLen  + " start " + this.start + " this.thumb: " + this.thumb);
             if (this.thumb) {
                  
                 this.thumb.setAttribute('x', gpos );
