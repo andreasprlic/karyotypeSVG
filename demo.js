@@ -19,15 +19,13 @@ require(['kt/main'], function(KT){
 
     $( document ).ready(function() {
 
-        var chr = "chr1";
+        var chr = "chrY";
 
         console.log(karyotypesvg.about);
 
         var kt = new karyotypesvg.KT();
 
         kt.init();
-
-        kt.setTrackHeight(20);
 
         kt.setParent("#karyotypeView");
 
