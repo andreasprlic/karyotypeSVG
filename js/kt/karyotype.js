@@ -37,7 +37,8 @@ define(
             border : 'black'
         };
 
-        var thumbColor = 'rgb(50, 88, 128)';
+        var thumbColor = colors.forceHex('green');
+        var thumbStroke = colors.forceHex('darkgreen');
 
         function Karyotype()
         {
@@ -45,13 +46,24 @@ define(
 
             this.width = 400;
 
-            this.trackHeigth = 15;
-            this.y = 0;
+            this.trackHeight = 15;
+
+            // we leave a bit of space at the top, for the thumb to be better visible
+
+            this.y = 6;
+
+            // to look ok, this.y should not be smaller than this.thumbSpacer
+            this.thumbSpacer = 6;
+
+            this.thumbWidth = 5;
+
+            this.padding = 0;
 
             this._initialized = false;
             this.listenerMap = {};
             this.karyos = [];
             this.scale = 1;
+
 
             this.chrLen = 1;
             this.start = 0;
@@ -95,7 +107,9 @@ define(
         Karyotype.prototype.resetSVG = function(){
             this.svg = util.makeElementNS(NS_SVG, 'svg');
 
-            util.setAttr(this.svg,'height',(this.trackHeigth + 5));
+            util.setAttr(this.svg,'height',this.y + 
+                this.trackHeight + this.thumbSpacer * 2 + 
+                this.padding);
 
 
         };
@@ -154,7 +168,7 @@ define(
         Karyotype.prototype.setTrackHeight = function(newHeight){
 
             if ( newHeight>0 ) {
-                this.trackHeigth = newHeight;
+                this.trackHeight = newHeight;
             }
             if ( this._initialized) {
                 this.redraw();
@@ -395,22 +409,23 @@ define(
         Karyotype.prototype.createBox = function(k, bmin, bmax, col,fill){
 
             var y = this.y;
-
-            var trackHeight = this.trackHeigth;
+            
+            var height = this.y + this.trackHeight;
 
             if (k.label === 'stalk' || k.label === 'acen'){
 
-                trackHeight = 5;
+                y = this.y + this.trackHeight / 4;
 
-                y = (this.trackHeigth - trackHeight) / 2;
-
+                height = this.y + this.trackHeight / 2;
             }
+
+
 
             var rect = util.makeElementNS(NS_SVG, 'rect', null, {
                 x: bmin,
                 y: y,
                 width: (bmax - bmin),
-                height: trackHeight,
+                height: height,
                 fill: fill,
                 //fill:col,
                 stroke: k.label === 'acen' ? col : karyo_palette.border,
@@ -443,16 +458,16 @@ define(
                 radius = 0;
             }
 
-            var path = this.leftBoundedRect(bmin,0, width,this.trackHeigth,radius);
+            var path = this.leftBoundedRect(bmin,this.y, width,this.y+ this.trackHeight,radius);
 
 
             var rect = util.makeElementNS(NS_SVG, 'path', null, {
                 d: path,
                 x: bmin,
-                y: (k.label === 'stalk' || k.label === 'acen' ? 5 : 0),
+                y: (k.label === 'stalk' || k.label === 'acen' ? this.y+5 : this.y),
                 width: (bmax - bmin),
                 height: (k.label === 'stalk' ||
-                k.label === 'acen' ? 5 : this.trackHeigth),
+                k.label === 'acen' ? this.y+5 : this.y+this.trackHeight),
                 fill: fill,
                 //fill:col,
                 stroke: k.label === 'acen' ? col : karyo_palette.border,
@@ -476,15 +491,15 @@ define(
                 radius = 0;
             }
 
-            var path = this.rightBoundedRect(bmin,0, width,this.trackHeigth,radius);
+            var path = this.rightBoundedRect(bmin,this.y, width,this.y+this.trackHeight,radius);
 
             var rect = util.makeElementNS(NS_SVG, 'path', null, {
                 d: path,
                 x: bmin,
-                y: (k.label === 'stalk' || k.label === 'acen' ? 5 : 0),
+                y: (k.label === 'stalk' || k.label === 'acen' ? this.y+5 : this.y),
                 width: (bmax - bmin),
                 height: (k.label === 'stalk' ||
-                k.label === 'acen' ? 5 : this.trackHeigth),
+                k.label === 'acen' ? this.y+5 : this.y+this.trackHeight),
                 fill: fill,
                 stroke: k.label === 'acen' ? col : karyo_palette.border,
                 strokewidth: 1
@@ -682,13 +697,16 @@ define(
             this.thumb = util.makeElementNS(NS_SVG, 'rect', null, {
                 id:'thumb' + this.chr,
                 x: 50,
-                y: -5,
-                width: 5,
-                height:
-                this.trackHeigth + 10,
+                y: this.y-this.thumbSpacer,
+                width: this.thumbWidth,
+                height: this.y+this.trackHeight + this.thumbSpacer *2 ,
                 fill: thumbColor,
+                stroke: thumbStroke,
+                strokewidth:1,
                 opacity:0.7
             });
+
+            $(this.thumb).css('cursor', 'col-resize');
 
             this.svg.appendChild(this.thumb);
 
