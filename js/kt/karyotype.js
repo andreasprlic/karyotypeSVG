@@ -37,13 +37,9 @@ define(
             border : 'black'
         };
 
-<<<<<<< HEAD
-        var thumbColor = 'rgb(50, 88, 128)';
-       
-=======
         var thumbColor = colors.forceHex('green');
         var thumbStroke = colors.forceHex('darkgreen');
->>>>>>> 65e750e810ff6d73264a22002be0b269bd542dca
+
 
         function Karyotype()
         {
