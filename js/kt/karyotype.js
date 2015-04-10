@@ -46,7 +46,7 @@ define(
 
             this.width = 400;
 
-            this.trackHeight = 15;
+            this.trackHeight = 10;
 
             // we leave a bit of space at the top, for the thumb to be better visible
 
@@ -57,7 +57,7 @@ define(
 
             this.thumbWidth = 5;
 
-            this.padding = 0;
+            this.padding = 1;
 
             this._initialized = false;
             this.listenerMap = {};
@@ -577,8 +577,8 @@ define(
 
             for (var i = 0; i < this.karyos.length; ++i) {
                 var k = this.karyos[i];
-                var bmin = ((1.0 * k.min) / this.chrLen) * this.width;
-                var bmax = ((1.0 * k.max) / this.chrLen) * this.width;
+                var bmin = this.padding+((1.0 * k.min) / this.chrLen) * this.width;
+                var bmax = this.padding+((1.0 * k.max) / this.chrLen) * this.width;
                 var col = karyo_palette[k.label];
 
                 if (!col) {
@@ -592,7 +592,6 @@ define(
                     console.error("don't understand " + k.label + " : " + k);
                 } else {
                     if (bmax > bmin) {
-
 
                         this.createGradient(i,col);
 
@@ -641,7 +640,7 @@ define(
                         $(box).bind('mouseover', mouseOverBandEvent);
 
                     } else {
-                        console.log("bmax < bmin " + k);
+                        console.error("bmax < bmin " + k);
                     }
                 }
             }
@@ -842,12 +841,12 @@ define(
 
         Karyotype.prototype.updateScale = function () {
 
-            var availWidth = this.getPreferredWidth();
+            var availWidth = this.getPreferredWidth() - this.padding * 2;
             if ( availWidth < 2) {
                 return;
             }
 
-            this.width = availWidth * this.scale;
+            this.width = availWidth * this.scale ;
 
             //$(this.parent).css('overflow', 'auto');
             //$(this.parent).css('width', $(this.realParent).width());
@@ -857,7 +856,7 @@ define(
             this.resetSVG();
             this.setParent(this.realParent);
 
-            $(this.svg).attr("width",this.width);
+            $(this.svg).attr("width",this.width+this.padding * 2);
             this.redraw();
 
         };
