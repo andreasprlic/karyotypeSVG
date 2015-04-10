@@ -654,9 +654,8 @@ define(
             var that = this;
             return function (event ) {
 
-               
-
-                var pos = $(that.realParent).position();
+            
+                var pos = $(that.realParent).offset();
 
                 var x = event.clientX -4;
 

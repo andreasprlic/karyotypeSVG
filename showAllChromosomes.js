@@ -95,11 +95,15 @@ require(['kt/main','kt/util'], function(KT, util){
     function addNewKaryotypeView(kt, chr, percent){
     	//console.log("adding new chromosome " + chr + " " + percent);
 
-    	var div = $("#ktContainer").append("<div>");
+    	var div = $("#ktContainer").append("<div id='row"+chr+"' class='row'>");
 
-    	$(div).append("<label> " + chr + " </label>");
+    	$("#row"+chr).append("<p id='label"+chr+"' class='col-sm-1 text-right'>");
 
-    	$(div).append("<div id='div"+chr+"'>");
+    	$("#label"+chr).append("<label> " + chr + " </label>");
+
+		$("#row"+chr).append("<div id='kt"+chr+"' class='col-sm-11'>");
+
+    	$("#kt"+chr).append("<div id='div"+chr+"'>");
 
  		var newkt = new karyotypesvg.KT();
 
