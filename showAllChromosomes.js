@@ -7,14 +7,15 @@ requirejs.config({
         spans:'kt/spans',
         colors:'kt/colors',
         karyotype:'kt/karyotype',
-        jquery:'vendor/jquery-2.0.2.min'
+        jquery:'vendor/jquery-2.0.2.min',
+        pako:'vendor/pako-0.2.6.min'
     }
 });
 
 var karyotypesvg ;
 var kts = [];
 
-require(['kt/main','kt/util'], function(KT, util){
+require(['kt/main'], function(KT){
 
     karyotypesvg = KT;
 
