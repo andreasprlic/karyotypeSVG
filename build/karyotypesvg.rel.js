@@ -668,6 +668,7 @@ define(
         function Karyotype()
         {
 
+            this.profiling = true;
 
             this.width = 400;
 
@@ -819,15 +820,15 @@ define(
         };
 
         
-        
-        // if url ends with .gz
-        // use gunzip to read the data faster
-
-           
 
         Karyotype.prototype.loadData = function(){
 
             var that = this;
+
+            var loadStart = (new Date()).getTime();
+            
+            // if url ends with .gz
+            // use gunzip to read the data faster
 
              if ( util.endsWith(dataLocation,'.gz')){
 
@@ -858,6 +859,11 @@ define(
                                                 new Uint16Array(pdata));
                                            
                                 that.setData(data);
+
+
+                                if  ( that.profiling ) {
+                                       
+                                }
                           },
                           error : function( jqXHR,  textStatus,  errorThrown){
                             
@@ -868,9 +874,13 @@ define(
 
                
             } else {
-                // probably a standard txt file
+
+                //  a standard txt file is much easier to parse (but slower to download)
                 $.get(dataLocation, function(data){
                     that.setData(data);
+                    if  ( that.profiling ) {
+                          
+                    }
                 });
             }
         };

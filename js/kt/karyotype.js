@@ -201,7 +201,7 @@ define(
 
             var that = this;
 
-            var loadStart = (new Date).getTime();
+            var loadStart = (new Date()).getTime();
             
             // if url ends with .gz
             // use gunzip to read the data faster
@@ -237,8 +237,10 @@ define(
                                 that.setData(data);
 
 
-                                if  ( that.profiling )
-                                    console.log("gz data loaded in : " + ((new Date).getTime()  - loadStart) );   
+                                if  ( that.profiling ) {
+                                    console.log("gz data loaded in : " + ((new Date()).getTime() -
+                                             loadStart) );   
+                                }
                           },
                           error : function( jqXHR,  textStatus,  errorThrown){
                             console.log(errorThrown);
@@ -253,8 +255,10 @@ define(
                 //  a standard txt file is much easier to parse (but slower to download)
                 $.get(dataLocation, function(data){
                     that.setData(data);
-                    if  ( that.profiling )
-                      console.log("txt data loaded in : " + ((new Date).getTime()  - loadStart) );    
+                    if  ( that.profiling ) {
+                      console.log("txt data loaded in : " + ((new Date()).getTime() - 
+                                loadStart) );    
+                    }
                 });
             }
         };
