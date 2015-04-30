@@ -4,7 +4,7 @@ This project allows to draw SVG graphics showing one (or multiple) ideograms of 
 
 ## See it in Action
 
-[Map Genomic Position tool at RCSB PDB](http://www.rcsb.org/pdb/chromosome.do?v=hg38&chromosome=chr16&pos=17700)
+[Map Genomic Position tool at RCSB PDB](http://www.rcsb.org/pdb/chromosome.do?v=hg38&chromosome=chr16&pos=177000)
 
 ## Example
 
