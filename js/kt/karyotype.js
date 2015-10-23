@@ -8,18 +8,18 @@
 //
 
 define(
-    [
-        './spans',
-        './util',
-        './colors',
-    ],
-    function(spans, util,colors) {
+    function(require){
+        //var spans, util,colors) 
 
-        "use strict";
+        var spans  = require('spans');
+        var util   = require('util');
+        var colors = require('colors');
+        var pako   = require('pako');
+
         var NS_SVG = 'http://www.w3.org/2000/svg';
 
         var dataLocation =
-            "http://staticwest.rcsb.org/gene/hg38/chromosome.band.hg38.txt";
+            "http://staticwest.rcsb.org/gene/hg38/chromosome.band.hg38.txt.gz";
 
         var karyo_palette = {
             gneg:  colors.forceHex('white'),
@@ -44,6 +44,7 @@ define(
         function Karyotype()
         {
 
+            this.profiling = true;
 
             this.width = 400;
 
@@ -155,10 +156,12 @@ define(
         };
 
         Karyotype.prototype.init = function(){
+
             this.loadData(dataLocation);
         };
 
         Karyotype.prototype.setDataLocation = function(url){
+
             dataLocation = url;
         };
 
@@ -192,13 +195,72 @@ define(
             return this.width;
         };
 
+        
 
         Karyotype.prototype.loadData = function(){
 
             var that = this;
-            $.get(dataLocation, function(data){
-                that.setData(data);
-            });
+
+            var loadStart = (new Date()).getTime();
+            
+            // if url ends with .gz
+            // use gunzip to read the data faster
+
+             if ( util.endsWith(dataLocation,'.gz')){
+
+                $.ajax({
+                          url: dataLocation,
+                          type: "GET",
+                          dataType: 'text',
+                          mimeType: 'text/plain; charset=x-user-defined',
+                          processData: false,
+                          responseType:'blob',
+                          success: function(result){
+                                
+                                // we need to convert the response to binary
+                                var bytes = [];
+
+                                for (var i = 0; i < result.length; ++i)
+                                {
+                                    bytes.push(result.charCodeAt(i));
+                                }
+
+                                var binData     = new Uint8Array(bytes);
+
+                                // now we use the pako library to uncompress the binary response
+                                var pdata     = pako.inflate(binData);
+
+                                // and convert the uncompressed data back to string
+                                var data     = String.fromCharCode.apply(null, 
+                                                new Uint16Array(pdata));
+                                           
+                                that.setData(data);
+
+
+                                if  ( that.profiling ) {
+                                    console.log("gz data loaded in : " + ((new Date()).getTime() -
+                                             loadStart) );   
+                                }
+                          },
+                          error : function( jqXHR,  textStatus,  errorThrown){
+                            console.log(errorThrown);
+                            console.error(textStatus);
+                            console.log(jqXHR);
+                          }
+                });
+
+               
+            } else {
+
+                //  a standard txt file is much easier to parse (but slower to download)
+                $.get(dataLocation, function(data){
+                    that.setData(data);
+                    if  ( that.profiling ) {
+                      console.log("txt data loaded in : " + ((new Date()).getTime() - 
+                                loadStart) );    
+                    }
+                });
+            }
         };
 
         Karyotype.prototype._dispatchEvent = function(event, newEventName, arg) {

@@ -3,7 +3,7 @@ SOURCE_FILES=[
     'js/kt/util.js',
     'js/kt/colors.js',
     'js/kt/karyotype.js',
-    'js/kt/main.js',
+    'js/kt/main.js',    
 ];
 
 module.exports = function(grunt){
