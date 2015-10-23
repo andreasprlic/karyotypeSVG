@@ -452,11 +452,11 @@ define(
 
             var width = (bmax-bmin);
             var radius = 5;
-            if ( width - radius <0) {
+            if ( width - radius <=0) {
                 radius = width - 1;
             }
-            if ( radius < 0 ) {
-                radius = 0;
+            if ( radius < 1 ) {
+                radius = 1;
             }
 
             var path = this.leftBoundedRect(bmin,this.y, width,this.y+ this.trackHeight,radius);
@@ -488,8 +488,8 @@ define(
             if ( width - radius <0) {
                 radius = width - 1;
             }
-            if ( radius < 0 ) {
-                radius = 0;
+            if ( radius < 1 ) {
+                radius = 1;
             }
 
             var path = this.rightBoundedRect(bmin,this.y, width,this.y+this.trackHeight,radius);
@@ -599,10 +599,27 @@ define(
                         var fill = 'url(#myGradient'+ this.chr + '_'  + i+')';
 
                         var box;
+
+                        var nextIsStalk = ( i < this.karyos.length -1  &&
+                            ( this.karyos[i+1].label === 'stalk' || 
+                            this.karyos[i+1].label === 'acen' ));
+
+                        var isStalk = (this.karyos[i].label === 'stalk' || 
+                            this.karyos[i].label === 'acen' );
+
+                        var prevWasStalk = ( i > 0  &&
+                            ( this.karyos[i-1].label === 'stalk' || 
+                            this.karyos[i-1].label === 'acen' ));
+
+
                         if ( i === 0 ) {
                             box = this.createLeftBox(k, bmin, bmax, col, fill);
                         } else if  ( i === (this.karyos.length - 1)) {
                             box = this.createRightBox(k, bmin, bmax, col,fill);
+                        } else if ( ! isStalk && nextIsStalk ) {
+                            box = this.createRightBox(k, bmin, bmax, col, fill);
+                        } else if ( ! isStalk && prevWasStalk) {
+                            box = this.createLeftBox(k, bmin, bmax, col, fill);    
                         } else {
                             box = this.createBox(k, bmin, bmax, col, fill);
                         }
