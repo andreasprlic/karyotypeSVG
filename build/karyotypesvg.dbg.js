@@ -643,7 +643,7 @@ define(
         var NS_SVG = 'http://www.w3.org/2000/svg';
 
         var dataLocation =
-            "http://staticwest.rcsb.org/gene/hg38/chromosome.band.hg38.txt.gz";
+            "http://cdn.rcsb.org/gene/hg38/chromosome.band.hg38.txt.gz";
 
         var karyo_palette = {
             gneg:  colors.forceHex('white'),
