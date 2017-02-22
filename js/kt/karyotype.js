@@ -1,6 +1,6 @@
 /* -*- mode: javascript; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*global $:false */
-// 
+//
 // Derived and heavily extended from karyoscape.js at Dalliance Genome Explorer
 //
 //
@@ -9,7 +9,7 @@
 
 define(
     function(require){
-        //var spans, util,colors) 
+        //var spans, util,colors)
 
         var spans  = require('spans');
         var util   = require('util');
@@ -19,7 +19,7 @@ define(
         var NS_SVG = 'http://www.w3.org/2000/svg';
 
         var dataLocation =
-            "http://staticwest.rcsb.org/gene/hg38/chromosome.band.hg38.txt.gz";
+            "http://cdn.rcsb.org/gene/hg38/chromosome.band.hg38.txt.gz";
 
         var karyo_palette = {
             gneg:  colors.forceHex('white'),
@@ -85,7 +85,7 @@ define(
             var that = this;
 
             function onResize() {
-                
+
 
                 $(parent).css('overflow', 'hidden');
                 $(parent).css('width', 'auto');
@@ -102,15 +102,15 @@ define(
                  clearTimeout(resizeTimer);
                 }
                 resizeTimer = setTimeout(onResize, 300);
-                
+
             });
         }
 
         Karyotype.prototype.resetSVG = function(){
             this.svg = util.makeElementNS(NS_SVG, 'svg');
 
-            util.setAttr(this.svg,'height',this.y + 
-                this.trackHeight + this.thumbSpacer * 2 + 
+            util.setAttr(this.svg,'height',this.y +
+                this.trackHeight + this.thumbSpacer * 2 +
                 this.padding);
 
 
@@ -195,14 +195,14 @@ define(
             return this.width;
         };
 
-        
+
 
         Karyotype.prototype.loadData = function(){
 
             var that = this;
 
             var loadStart = (new Date()).getTime();
-            
+
             // if url ends with .gz
             // use gunzip to read the data faster
 
@@ -216,7 +216,7 @@ define(
                           processData: false,
                           responseType:'blob',
                           success: function(result){
-                                
+
                                 // we need to convert the response to binary
                                 var bytes = [];
 
@@ -231,15 +231,15 @@ define(
                                 var pdata     = pako.inflate(binData);
 
                                 // and convert the uncompressed data back to string
-                                var data     = String.fromCharCode.apply(null, 
+                                var data     = String.fromCharCode.apply(null,
                                                 new Uint16Array(pdata));
-                                           
+
                                 that.setData(data);
 
 
                                 if  ( that.profiling ) {
                                     console.log("gz data loaded in : " + ((new Date()).getTime() -
-                                             loadStart) );   
+                                             loadStart) );
                                 }
                           },
                           error : function( jqXHR,  textStatus,  errorThrown){
@@ -249,15 +249,15 @@ define(
                           }
                 });
 
-               
+
             } else {
 
                 //  a standard txt file is much easier to parse (but slower to download)
                 $.get(dataLocation, function(data){
                     that.setData(data);
                     if  ( that.profiling ) {
-                      console.log("txt data loaded in : " + ((new Date()).getTime() - 
-                                loadStart) );    
+                      console.log("txt data loaded in : " + ((new Date()).getTime() -
+                                loadStart) );
                     }
                 });
             }
@@ -309,22 +309,22 @@ define(
         Karyotype.prototype.update = function(chr, start, end) {
             this.start = start;
             this.end = end;
-            
+
             if (!this.chr || chr !== this.chr) {
-                
+
                 this.chr = chr;
-                
+
                 util.removeChildren(this.svg);
                 //$(this.svg).empty();
-                
+
                 this.karyos = [];
-                
+
 
                 for (var i = 0 ; i < this.bands.length ; i++){
 
                     //console.log(bands[i][0] + " " + chr);
                     if ( this.bands[i][0] === chr){
-                        
+
                         var elem = this.bands[i];
 
                         //var chr=elem[0];
@@ -351,7 +351,7 @@ define(
                 if ( this._initialized) {
                     this.redraw();
                 }
-            } 
+            }
 
             if ( this._initialized) {
 
@@ -382,13 +382,13 @@ define(
                     continue;
                 }
 
-               
+
                 if ( util.indexOf.call(chromosomes,chr) < 0){
                     chromosomes.push(chr);
                 }
 
             }
-            
+
             return chromosomes.sort(util.sortAlphaNum);
         };
 
@@ -397,9 +397,9 @@ define(
              var data = this.getBands();
              for(var i = 0; i < data.length; i++){
 
-               
+
                 var chr = data[i][0];
-                
+
                 if ( chr.startsWith("#") ) {
                     continue;
                 }
@@ -417,12 +417,12 @@ define(
                 var max = parseInt(data[i][2]);
 
                 if ( typeof size[chr] === 'undefined'){
-                    
 
-                    size[chr] = max; 
+
+                    size[chr] = max;
                 } else {
                     if ( max > size[chr]) {
-                        
+
                         size[chr] = max;
                     }
                 }
@@ -461,7 +461,7 @@ define(
             });
 
             gradient.appendChild(stop2);
-                    
+
             var defs = util.makeElementNS(NS_SVG, 'defs');
 
             defs.appendChild(gradient);
@@ -472,7 +472,7 @@ define(
         Karyotype.prototype.createBox = function(k, bmin, bmax, col,fill){
 
             var y = this.y;
-            
+
             var height = this.y + this.trackHeight;
 
             if (k.label === 'stalk' || k.label === 'acen'){
@@ -538,7 +538,7 @@ define(
 
             });
 
-            
+
 
             return rect;
         };
@@ -570,7 +570,7 @@ define(
 
             });
 
-            
+
             return rect;
         };
 
@@ -645,12 +645,12 @@ define(
                 var col = karyo_palette[k.label];
 
                 if (!col) {
-                    col = karyo_palette[k.id];                    
+                    col = karyo_palette[k.id];
                     k.label=k.id;
-                } 
-                
+                }
+
                 if (!col) {
-                    
+
                     console.log(k);
                     console.error("don't understand " + k.label + " : " + k);
                 } else {
@@ -663,14 +663,14 @@ define(
                         var box;
 
                         var nextIsStalk = ( i < this.karyos.length -1  &&
-                            ( this.karyos[i+1].label === 'stalk' || 
+                            ( this.karyos[i+1].label === 'stalk' ||
                             this.karyos[i+1].label === 'acen' ));
 
-                        var isStalk = (this.karyos[i].label === 'stalk' || 
+                        var isStalk = (this.karyos[i].label === 'stalk' ||
                             this.karyos[i].label === 'acen' );
 
                         var prevWasStalk = ( i > 0  &&
-                            ( this.karyos[i-1].label === 'stalk' || 
+                            ( this.karyos[i-1].label === 'stalk' ||
                             this.karyos[i-1].label === 'acen' ));
 
 
@@ -681,7 +681,7 @@ define(
                         } else if ( ! isStalk && nextIsStalk ) {
                             box = this.createRightBox(k, bmin, bmax, col, fill);
                         } else if ( ! isStalk && prevWasStalk) {
-                            box = this.createLeftBox(k, bmin, bmax, col, fill);    
+                            box = this.createLeftBox(k, bmin, bmax, col, fill);
                         } else {
                             box = this.createBox(k, bmin, bmax, col, fill);
                         }
@@ -691,7 +691,7 @@ define(
                             chrNr = this.chr.substring(3);
                         }
                         $(box).tooltip({
-                            'title':chrNr + k.id + ' ' + 
+                            'title':chrNr + k.id + ' ' +
                             this.numberWithCommas(k.min) + ' - ' +
                             this.numberWithCommas(k.max),
                             'container':'body'
@@ -725,16 +725,16 @@ define(
                 }
             }
 
-            this.initThumb();            
+            this.initThumb();
 
         };
 
-       
+
         Karyotype.prototype.createBandClickedEvent = function(k){
             var that = this;
             return function (event ) {
 
-            
+
                 var pos = $(that.realParent).offset();
 
                 var x = event.clientX -4;
@@ -745,11 +745,11 @@ define(
                 var trueX = x - pos.left;
 
                 var seqPos = Math.round(trueX / width * chrLen);
-  
+
                 that._dispatchEvent({'name':'bandClickedEvent'},
-                    'bandClicked',{ 'min': seqPos,                     
+                    'bandClicked',{ 'min': seqPos,
                      'max': (seqPos + width),
-                     'chrLen':that.chrLen, 
+                     'chrLen':that.chrLen,
                      'chr' : that.chr,
                      'band':k});
             };
@@ -814,9 +814,9 @@ define(
                 var start =   Math.round(xval / thisKaryo.width * thisKaryo.chrLen) ;
 
                 //console.log(start + " " + thisKaryo.chrLen + " " + thisKaryo.chrLen * start ) ;
-                
+
                 var width = thisKaryo.thumb.getAttribute('width')|1;
-                
+
                 var end = Math.round(start + (width / thisKaryo.width * thisKaryo.chrLen));
 
                 that._dispatchEvent({'name':'sliderMovedEvent'},
@@ -865,7 +865,7 @@ define(
             }
 
             var pos = (this.start|0) ;
-            
+
             var gpos = Math.round(((1.0 * pos)/this.chrLen) * this.width);
 
             var w = Math.round((this.end|0 - this.start|0) / this.chrLen * this.width);
@@ -877,18 +877,18 @@ define(
             // console.log("setThumb: " + gpos + " " + w + " tw: " + this.width + " chrlen " +
             //             this.chrLen  + " start " + this.start + " this.thumb: " + this.thumb);
             if (this.thumb) {
-                 
+
                 this.thumb.setAttribute('x', gpos );
-              
+
                 this.thumb.setAttribute('width', w);
-                
+
             }
         };
 
-        /** allows to set the scale of this karyotype image. This can be used when showing 
+        /** allows to set the scale of this karyotype image. This can be used when showing
             multiple karyotypes on the same page.
 
-            Chr1 would be 100% of the scale, and each other chromosome can get scaled 
+            Chr1 would be 100% of the scale, and each other chromosome can get scaled
             down relative to its size.
 
             Percent is a number between 0 and 1;
