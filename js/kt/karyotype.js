@@ -217,24 +217,30 @@ define(
                           responseType:'blob',
                           success: function(result){
 
-                                // we need to convert the response to binary
-                                var bytes = [];
 
-                                for (var i = 0; i < result.length; ++i)
-                                {
-                                    bytes.push(result.charCodeAt(i));
+                                try {
+                                  // we need to convert the response to binary
+                                  var bytes = [];
+
+                                  for (var i = 0; i < result.length; ++i)
+                                  {
+                                      bytes.push(result.charCodeAt(i));
+                                  }
+
+                                  var binData     = new Uint8Array(bytes);
+
+                                  // now we use the pako library to uncompress the binary response
+                                  var pdata     = pako.inflate(binData);
+
+                                  // and convert the uncompressed data back to string
+                                  var data     = String.fromCharCode.apply(null,
+                                                  new Uint16Array(pdata));
+
+                                  that.setData(data);
+                                } catch (err){
+                                  // probably conent is already uncompressed
+                                  that.setData(result);
                                 }
-
-                                var binData     = new Uint8Array(bytes);
-
-                                // now we use the pako library to uncompress the binary response
-                                var pdata     = pako.inflate(binData);
-
-                                // and convert the uncompressed data back to string
-                                var data     = String.fromCharCode.apply(null,
-                                                new Uint16Array(pdata));
-
-                                that.setData(data);
 
 
                                 if  ( that.profiling ) {
