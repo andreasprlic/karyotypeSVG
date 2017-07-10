@@ -6,6 +6,8 @@ requirejs.config({
         util:'kt/util',
         spans:'kt/spans',
         colors:'kt/colors',
+		datatrack:'kt/datatrack',
+        label:'kt/label',
         karyotype:'kt/karyotype',
         jquery:'vendor/jquery-2.0.2.min',
         pako:'vendor/pako-0.2.6.min'
@@ -73,7 +75,27 @@ require(['kt/main'], function(KT){
 
 				kts.push(newkt);
 
+				if ( chromosomes[i] === "chr1"){
+                   newkt.addLabel("LYPD8",248902716,248903151);
+                }
 
+                if ( chromosomes[i] === "chr17") {
+                    //41196311        41277500
+                    newkt.addLabel("BRCA1", 41196311,41277500);
+                }
+
+                if ( chromosomes[i] === "chr2") {
+                   newkt.addLabel("TMEM178A",39892637,   39945104);
+                }
+                if (chromosomes[i]  === "chr3"){
+                   newkt.addLabel("TKT",53259652,53290130);
+                }
+                if (chromosomes[i] === "chr4"){
+                    newkt.addLabel("TMEM175",926174,952443);
+                }
+                if (chromosomes[i] === "chr8"){
+                    newkt.addLabel("ZNF16",146155743,146176274);
+                }
 
 			}
 

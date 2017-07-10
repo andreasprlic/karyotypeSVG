@@ -1,13 +1,14 @@
 /*jshint unused: false */
 
 
-define(function()
+define(function(require)
 {
 
     var exports = {};
 
     var attr_name_cache = {};
 
+    var pako   = require('pako');
 
     exports.indexOf = function(needle) {
     
@@ -227,6 +228,35 @@ define(function()
             }
         }, false);
     };
+
+    exports.gzipSuccessFunction = function(result){
+
+            try {
+                // we need to convert the response to binary
+                var bytes = [];
+
+                for (var i = 0; i < result.length; ++i)
+                {
+                    bytes.push(result.charCodeAt(i));
+                }
+
+                var binData     = new Uint8Array(bytes);
+
+                // now we use the pako library to uncompress the binary response
+                var pdata     = pako.inflate(binData);
+
+                // and convert the uncompressed data back to string
+                var data     = String.fromCharCode.apply(null,
+                    new Uint16Array(pdata));
+
+                return data;
+            } catch (err){
+                console.log(err);
+                // probably conent is already uncompressed
+                return result;
+            }
+
+        };
 
     return exports;
 });

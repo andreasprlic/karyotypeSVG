@@ -14,7 +14,8 @@ define(
         var spans  = require('spans');
         var util   = require('util');
         var colors = require('colors');
-        var pako   = require('pako');
+        var datatrack = require('datatrack');
+        var label  = require('label');
 
         var NS_SVG = 'http://www.w3.org/2000/svg';
 
@@ -44,15 +45,20 @@ define(
         function Karyotype()
         {
 
+            this.name = "chromosome";
+
             this.profiling = true;
 
             this.width = 400;
 
             this.trackHeight = 10;
+            this.dataTrackHeight = 15;
 
             // we leave a bit of space at the top, for the thumb to be better visible
-
             this.y = 6;
+
+            // additional space for a data-track has been added
+            this.dataTrackAdded = false;
 
             // to look ok, this.y should not be smaller than this.thumbSpacer
             this.thumbSpacer = 6;
@@ -66,12 +72,13 @@ define(
             this.karyos = [];
             this.scale = 1;
 
-
             this.chrLen = 1;
             this.start = 0;
             this.end = 1;
             this.bands = [];
             this.thumbEnabled = true;
+
+            this.labels = [];
 
             this.realParent = "";
             this.parent = "";
@@ -106,13 +113,45 @@ define(
             });
         }
 
+        Karyotype.prototype.getName = function(){
+            return this.name;
+        };
+
+        Karyotype.prototype.setName = function(name){
+            this.name = name;
+        };
+
         Karyotype.prototype.resetSVG = function(){
             this.svg = util.makeElementNS(NS_SVG, 'svg');
 
-            util.setAttr(this.svg,'height',this.y +
+            var height = this.y +
                 this.trackHeight + this.thumbSpacer * 2 +
-                this.padding);
+                this.padding;
 
+            if ( typeof this.dataTrack !== 'undefined'){
+                height += this.trackHeight;
+            }
+
+            if ( this.labels.length > 0){
+                height += this.trackHeight;
+            }
+
+            util.setAttr(this.svg,'height',height);
+
+
+        };
+
+        Karyotype.prototype.addLabel = function(txt, start, stop){
+
+            var l = label.Label(this);
+            l.setDescription(txt);
+            l.setStart(start);
+            l.setStop(stop);
+
+            console.log("added label " + txt);
+            this.labels.push(l);
+
+            this.updateScale();
 
         };
 
@@ -155,9 +194,25 @@ define(
             }
         };
 
+        Karyotype.prototype.notifyReady = function(){
+            this._dispatchEvent({'name':'viewerReadyEvent'},
+                    'viewerReady',this);
+        };
+
+        Karyotype.prototype.notifyLoadDataTracks = function(){
+
+            console.log("load data tracks");
+            this._dispatchEvent({'name':'loadDataTrackEvent'},
+                    'loadDataTrack',this);
+        };
+
         Karyotype.prototype.init = function(){
 
             this.loadData(dataLocation);
+        };
+
+        Karyotype.prototype.isReady = function(){
+            return this._initialized;
         };
 
         Karyotype.prototype.setDataLocation = function(url){
@@ -201,58 +256,27 @@ define(
 
             var that = this;
 
-            var loadStart = (new Date()).getTime();
-
             // if url ends with .gz
             // use gunzip to read the data faster
 
-             if ( util.endsWith(dataLocation,'.gz')){
+            if ( util.endsWith(dataLocation,'.gz')){
 
                 $.ajax({
-                          url: dataLocation,
-                          type: "GET",
-                          dataType: 'text',
-                          mimeType: 'text/plain; charset=x-user-defined',
-                          processData: false,
-                          responseType:'blob',
-                          success: function(result){
-
-
-                                try {
-                                  // we need to convert the response to binary
-                                  var bytes = [];
-
-                                  for (var i = 0; i < result.length; ++i)
-                                  {
-                                      bytes.push(result.charCodeAt(i));
-                                  }
-
-                                  var binData     = new Uint8Array(bytes);
-
-                                  // now we use the pako library to uncompress the binary response
-                                  var pdata     = pako.inflate(binData);
-
-                                  // and convert the uncompressed data back to string
-                                  var data     = String.fromCharCode.apply(null,
-                                                  new Uint16Array(pdata));
-
-                                  that.setData(data);
-                                } catch (err){
-                                  // probably conent is already uncompressed
-                                  that.setData(result);
-                                }
-
-
-                                if  ( that.profiling ) {
-                                    console.log("gz data loaded in : " + ((new Date()).getTime() -
-                                             loadStart) );
-                                }
-                          },
-                          error : function( jqXHR,  textStatus,  errorThrown){
-                            console.log(errorThrown);
-                            console.error(textStatus);
-                            console.log(jqXHR);
-                          }
+                    url: dataLocation,
+                    type: "GET",
+                    dataType: 'text',
+                    mimeType: 'text/plain; charset=x-user-defined',
+                    processData: false,
+                    responseType: 'blob',
+                    success: function(result) {
+                        var d = util.gzipSuccessFunction(result);
+                        that.setData(d);
+                    },
+                    error:function (jqXHR, textStatus, errorThrown) {
+                        console.log(errorThrown);
+                        console.error(textStatus);
+                        console.log(jqXHR);
+                    },
                 });
 
 
@@ -261,10 +285,6 @@ define(
                 //  a standard txt file is much easier to parse (but slower to download)
                 $.get(dataLocation, function(data){
                     that.setData(data);
-                    if  ( that.profiling ) {
-                      console.log("txt data loaded in : " + ((new Date()).getTime() -
-                                loadStart) );
-                    }
                 });
             }
         };
@@ -272,10 +292,12 @@ define(
         Karyotype.prototype._dispatchEvent = function(event, newEventName, arg) {
 
             var callbacks = this.listenerMap[newEventName];
+
             if (callbacks) {
                 callbacks.forEach(function (callback) {
                     callback(arg, event);
                 });
+
             }
         };
 
@@ -296,8 +318,7 @@ define(
 
             if (!this._initialized) {
                 this._initialized = true;
-                this._dispatchEvent({'name':'viewerReadyEvent'},
-                    'viewerReady',this);
+                this.notifyReady();
             }
         };
 
@@ -477,18 +498,17 @@ define(
 
         Karyotype.prototype.createBox = function(k, bmin, bmax, col,fill){
 
+
             var y = this.y;
 
-            var height = this.y + this.trackHeight;
+            var height = this.trackHeight + 6;
 
             if (k.label === 'stalk' || k.label === 'acen'){
 
                 y = this.y + this.trackHeight / 4;
 
-                height = this.y + this.trackHeight / 2;
+                height = 6 + this.trackHeight / 2;
             }
-
-
 
             var rect = util.makeElementNS(NS_SVG, 'rect', null, {
                 x: bmin,
@@ -503,6 +523,10 @@ define(
             });
 
             return rect;
+        };
+
+        Karyotype.prototype.getColors = function(){
+            return karyo_palette;
         };
 
         Karyotype.prototype.numberWithCommas = function(x){
@@ -527,7 +551,11 @@ define(
                 radius = 1;
             }
 
-            var path = this.leftBoundedRect(bmin,this.y, width,this.y+ this.trackHeight,radius);
+            var path = this.leftBoundedRect(bmin,this.y, width,6+ this.trackHeight,radius);
+
+            var height = (k.label === 'stalk' ||
+                    k.label === 'acen' ? 11 : 6+this.trackHeight);
+
 
 
             var rect = util.makeElementNS(NS_SVG, 'path', null, {
@@ -535,8 +563,7 @@ define(
                 x: bmin,
                 y: (k.label === 'stalk' || k.label === 'acen' ? this.y+5 : this.y),
                 width: (bmax - bmin),
-                height: (k.label === 'stalk' ||
-                k.label === 'acen' ? this.y+5 : this.y+this.trackHeight),
+                height: height,
                 fill: fill,
                 //fill:col,
                 stroke: k.label === 'acen' ? col : karyo_palette.border,
@@ -560,15 +587,17 @@ define(
                 radius = 1;
             }
 
-            var path = this.rightBoundedRect(bmin,this.y, width,this.y+this.trackHeight,radius);
+            var path = this.rightBoundedRect(bmin,this.y, width,6+this.trackHeight,radius);
+
+            var height = (k.label === 'stalk' ||
+                k.label === 'acen' ? 11 : 6+this.trackHeight);
 
             var rect = util.makeElementNS(NS_SVG, 'path', null, {
                 d: path,
                 x: bmin,
                 y: (k.label === 'stalk' || k.label === 'acen' ? this.y+5 : this.y),
                 width: (bmax - bmin),
-                height: (k.label === 'stalk' ||
-                k.label === 'acen' ? this.y+5 : this.y+this.trackHeight),
+                height: height,
                 fill: fill,
                 stroke: k.label === 'acen' ? col : karyo_palette.border,
                 strokewidth: 1
@@ -618,6 +647,27 @@ define(
             return retval;
         };
 
+        Karyotype.prototype.drawDataTrack = function(){
+             if (typeof this.dataTrack === 'undefined') {
+                 return;
+             }
+             var data = this.dataTrack.getData();
+             if ( ! data.header) {
+                 return;
+             }
+
+             if (! this.dataTrackAdded ) {
+                 this.dataTrackAdded = true;
+                 this.y += this.dataTrackHeight;
+             }
+             this.dataTrack.redraw(this.svg,this.y, this.dataTrackHeight);
+
+
+        };
+
+        Karyotype.prototype.toScreenCoords = function(genomicCoods){
+            return ( this.padding+((1.0 * genomicCoods) / this.chrLen) * this.width );
+        };
 
         Karyotype.prototype.redraw = function() {
 
@@ -642,12 +692,17 @@ define(
                     label: 'gneg'
                 });
             }
+
+            if (this.dataTrack) {
+                this.drawDataTrack();
+            }
+
             var bandspans = null;
 
             for (var i = 0; i < this.karyos.length; ++i) {
                 var k = this.karyos[i];
-                var bmin = this.padding+((1.0 * k.min) / this.chrLen) * this.width;
-                var bmax = this.padding+((1.0 * k.max) / this.chrLen) * this.width;
+                var bmin = this.toScreenCoords(k.min);
+                var bmax = this.toScreenCoords(k.max);
                 var col = karyo_palette[k.label];
 
                 if (!col) {
@@ -732,6 +787,13 @@ define(
             }
 
             this.initThumb();
+
+
+            var that = this;
+            this.labels.forEach(function(label){
+
+                label.redraw(that.svg, that.y + that.trackHeight + 6);
+            });
 
         };
 
@@ -921,6 +983,18 @@ define(
 
         };
 
+        Karyotype.prototype.getScale = function(){
+            return this.scale;
+        };
+
+         Karyotype.prototype.getPadding = function(){
+            return this.padding;
+        };
+
+         Karyotype.prototype.getWidth = function(){
+            return this.width;
+        };
+
         Karyotype.prototype.updateScale = function () {
 
             var availWidth = this.getPreferredWidth() - this.padding * 2;
@@ -952,6 +1026,13 @@ define(
                 return 1;
             }
             return availWidth;
+
+        };
+
+        Karyotype.prototype.addDataTrack = function(url){
+
+            this.dataTrack = new datatrack.DataTrack(this);
+            this.dataTrack.setURL(url);
 
         };
 

@@ -2,7 +2,9 @@ SOURCE_FILES=[
     'js/kt/spans.js',
     'js/kt/util.js',
     'js/kt/colors.js',
+    'js/kt/label.js',
     'js/kt/karyotype.js',
+    'js/kt/datatrack.js',
     'js/kt/main.js',    
 ];
 

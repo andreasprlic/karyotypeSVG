@@ -6,6 +6,8 @@ requirejs.config({
         util:'kt/util',
         spans:'kt/spans',
         colors:'kt/colors',
+        datatrack:'kt/datatrack',
+        label:'kt/label',
         karyotype:'kt/karyotype',
         jquery:'vendor/jquery-2.0.2.min',
         pako:'vendor/pako-0.2.6.min'
@@ -27,6 +29,8 @@ require(['kt/main'], function(KT){
         var kt = new karyotypesvg.KT();
 
         kt.init();
+
+        kt.addLabel("LYPD8",248902716,248903151);
 
         kt.setParent("#karyotypeView");
 

@@ -6,6 +6,8 @@ requirejs.config({
         util:'kt/util',
         spans:'kt/spans',
         colors:'kt/colors',
+        label:'kt/label',
+        datatrack:'kt/datatrack',
         karyotype:'kt/karyotype',
         jquery:'vendor/jquery-2.0.2.min',
         pako:'vendor/pako-0.2.6.min'
