@@ -8,14 +8,14 @@
 //
 
 define(
-    function(require){
+    function (require) {
         //var spans, util,colors)
 
-        var spans  = require('spans');
-        var util   = require('util');
+        var spans = require('spans');
+        var util = require('util');
         var colors = require('colors');
         var datatrack = require('datatrack');
-        var label  = require('label');
+        var label = require('label');
 
         var NS_SVG = 'http://www.w3.org/2000/svg';
 
@@ -23,7 +23,7 @@ define(
             "http://cdn.rcsb.org/gene/hg38/chromosome.band.hg38.txt.gz";
 
         var karyo_palette = {
-            gneg:  colors.forceHex('white'),
+            gneg: colors.forceHex('white'),
             gpos25: 'rgb(200,200,200)',
             gpos33: 'rgb(180,180,180)',
             gpos50: 'rgb(128,128,128)',
@@ -34,16 +34,15 @@ define(
             gvar: 'rgb(100,100,100)',
             acen: colors.forceHex('red'),
             stalk: 'rgb(100,100,100)',
-            gradient : 'rgb(128,128,128)',
-            border : 'black'
+            gradient: 'rgb(128,128,128)',
+            border: 'black'
         };
 
         var thumbColor = colors.forceHex('green');
         var thumbStroke = colors.forceHex('darkgreen');
 
 
-        function Karyotype()
-        {
+        function Karyotype() {
 
             this.name = "chromosome";
 
@@ -66,6 +65,7 @@ define(
             this.thumbWidth = 5;
 
             this.padding = 1;
+            this.leftSpace =40;
 
             this._initialized = false;
             this.listenerMap = {};
@@ -78,6 +78,8 @@ define(
             this.bands = [];
             this.thumbEnabled = true;
 
+
+            this.showName = true;
             this.labels = [];
 
             this.realParent = "";
@@ -105,43 +107,43 @@ define(
             var resizeTimer = false;
 
             $(window).resize(function () {
-                if ( resizeTimer )  {
-                 clearTimeout(resizeTimer);
+                if (resizeTimer) {
+                    clearTimeout(resizeTimer);
                 }
                 resizeTimer = setTimeout(onResize, 300);
 
             });
         }
 
-        Karyotype.prototype.getName = function(){
+        Karyotype.prototype.getName = function () {
             return this.name;
         };
 
-        Karyotype.prototype.setName = function(name){
+        Karyotype.prototype.setName = function (name) {
             this.name = name;
         };
 
-        Karyotype.prototype.resetSVG = function(){
+        Karyotype.prototype.resetSVG = function () {
             this.svg = util.makeElementNS(NS_SVG, 'svg');
 
             var height = this.y +
                 this.trackHeight + this.thumbSpacer * 2 +
                 this.padding;
 
-            if ( typeof this.dataTrack !== 'undefined'){
+            if (typeof this.dataTrack !== 'undefined') {
                 height += this.trackHeight;
             }
 
-            if ( this.labels.length > 0){
+            if (this.labels.length > 0) {
                 height += this.trackHeight;
             }
 
-            util.setAttr(this.svg,'height',height);
+            util.setAttr(this.svg, 'height', height);
 
 
         };
 
-        Karyotype.prototype.addLabel = function(txt, start, stop){
+        Karyotype.prototype.addLabel = function (txt, start, stop) {
 
             var l = label.Label(this);
             l.setDescription(txt);
@@ -155,7 +157,7 @@ define(
 
         };
 
-        Karyotype.prototype.setParent = function(elem) {
+        Karyotype.prototype.setParent = function (elem) {
 
             if (typeof $(elem) !== undefined) {
 
@@ -177,7 +179,7 @@ define(
 
         };
 
-        Karyotype.prototype.addListener = function(eventName, callback) {
+        Karyotype.prototype.addListener = function (eventName, callback) {
             var callbacks = this.listenerMap[eventName];
             if (typeof callbacks === 'undefined') {
                 callbacks = [];
@@ -194,72 +196,91 @@ define(
             }
         };
 
-        Karyotype.prototype.notifyReady = function(){
-            this._dispatchEvent({'name':'viewerReadyEvent'},
-                    'viewerReady',this);
+        Karyotype.prototype.notifyReady = function () {
+            this._dispatchEvent({'name': 'viewerReadyEvent'},
+                'viewerReady', this);
         };
 
-        Karyotype.prototype.notifyLoadDataTracks = function(){
+        Karyotype.prototype.notifyLoadDataTracks = function () {
 
             console.log("load data tracks");
-            this._dispatchEvent({'name':'loadDataTrackEvent'},
-                    'loadDataTrack',this);
+            this._dispatchEvent({'name': 'loadDataTrackEvent'},
+                'loadDataTrack', this);
         };
 
-        Karyotype.prototype.init = function(){
+        Karyotype.prototype.init = function () {
 
             this.loadData(dataLocation);
         };
 
-        Karyotype.prototype.isReady = function(){
+        Karyotype.prototype.isReady = function () {
             return this._initialized;
         };
 
-        Karyotype.prototype.setDataLocation = function(url){
+        Karyotype.prototype.setDataLocation = function (url) {
 
             dataLocation = url;
         };
 
-        Karyotype.prototype.getSVG = function() {
+        Karyotype.prototype.getSVG = function () {
             return this.svg;
         };
 
-        Karyotype.prototype.setTrackHeight = function(newHeight){
+        Karyotype.prototype.setTrackHeight = function (newHeight) {
 
-            if ( newHeight>0 ) {
+            if (newHeight > 0) {
                 this.trackHeight = newHeight;
             }
-            if ( this._initialized) {
+            if (this._initialized) {
                 this.redraw();
             }
         };
 
-        Karyotype.prototype.getChrLen = function(){
+        Karyotype.prototype.getChrLen = function () {
 
             return this.chrLen;
         };
 
-        Karyotype.prototype.getChr = function(){
+        /** returns the name of the chromosome
+         *
+         * @returns {*}
+         */
+        Karyotype.prototype.getChr = function () {
 
             return this.chr;
         };
 
+        /** returns the name of the chromosome
+         *
+         * @returns {*}
+         */
+        Karyotype.prototype.getName = function () {
 
-        Karyotype.prototype.getWidth = function(){
+            return this.chr;
+        };
+
+        /** set the flag to show the name of the chromosome
+         *
+         * @param showName
+         */
+        Karyotype.prototype.showName = function (showName) {
+            this.showName = showName;
+        };
+
+        Karyotype.prototype.getWidth = function () {
 
             return this.width;
         };
 
 
-
-        Karyotype.prototype.loadData = function(){
+        Karyotype.prototype.loadData = function () {
 
             var that = this;
 
             // if url ends with .gz
             // use gunzip to read the data faster
 
-            if ( util.endsWith(dataLocation,'.gz')){
+            if (util.endsWith(dataLocation, '.gz')) {
 
                 $.ajax({
                     url: dataLocation,
@@ -268,11 +289,11 @@ define(
                     mimeType: 'text/plain; charset=x-user-defined',
                     processData: false,
                     responseType: 'blob',
-                    success: function(result) {
+                    success: function (result) {
                         var d = util.gzipSuccessFunction(result);
                         that.setData(d);
                     },
-                    error:function (jqXHR, textStatus, errorThrown) {
+                    error: function (jqXHR, textStatus, errorThrown) {
                         console.log(errorThrown);
                         console.error(textStatus);
                         console.log(jqXHR);
@@ -283,13 +304,13 @@ define(
             } else {
 
                 //  a standard txt file is much easier to parse (but slower to download)
-                $.get(dataLocation, function(data){
+                $.get(dataLocation, function (data) {
                     that.setData(data);
                 });
             }
         };
 
-        Karyotype.prototype._dispatchEvent = function(event, newEventName, arg) {
+        Karyotype.prototype._dispatchEvent = function (event, newEventName, arg) {
 
             var callbacks = this.listenerMap[newEventName];
 
@@ -301,13 +322,13 @@ define(
             }
         };
 
-        Karyotype.prototype.setData = function(data){
+        Karyotype.prototype.setData = function (data) {
 
             data = data.split(/\r?\n/);
 
-            for(var i = 0; i < data.length; i++){
+            for (var i = 0; i < data.length; i++) {
 
-                if ( data[i].startsWith("#")) {
+                if (data[i].startsWith("#")) {
                     continue;
                 }
 
@@ -322,18 +343,17 @@ define(
             }
         };
 
-        Karyotype.prototype.getBands = function(){
+        Karyotype.prototype.getBands = function () {
             return this.bands;
         };
 
-        Karyotype.prototype.setBands = function(bands){
+        Karyotype.prototype.setBands = function (bands) {
             this.bands = bands;
             this._initialized = true;
         };
 
 
-
-        Karyotype.prototype.update = function(chr, start, end) {
+        Karyotype.prototype.update = function (chr, start, end) {
             this.start = start;
             this.end = end;
 
@@ -347,10 +367,10 @@ define(
                 this.karyos = [];
 
 
-                for (var i = 0 ; i < this.bands.length ; i++){
+                for (var i = 0; i < this.bands.length; i++) {
 
                     //console.log(bands[i][0] + " " + chr);
-                    if ( this.bands[i][0] === chr){
+                    if (this.bands[i][0] === chr) {
 
                         var elem = this.bands[i];
 
@@ -360,7 +380,7 @@ define(
                         var name = elem[3];
                         var desc = elem[4];
 
-                        if ( max > this.chrLen) {
+                        if (max > this.chrLen) {
                             this.chrLen = max;
                         }
 
@@ -375,27 +395,27 @@ define(
                     }
                 }
 
-                if ( this._initialized) {
+                if (this._initialized) {
                     this.redraw();
                 }
             }
 
-            if ( this._initialized) {
+            if (this._initialized) {
 
                 this.setThumb();
             }
         };
 
-        Karyotype.prototype.getChromosomeList = function(){
+        Karyotype.prototype.getChromosomeList = function () {
 
             var chromosomes = [];
             var data = this.getBands();
-              for(var i = 0; i < data.length; i++){
+            for (var i = 0; i < data.length; i++) {
                 //console.log(data[i]);
 
                 var chr = data[i][0];
 
-                if ( chr.startsWith("#") ) {
+                if (chr.startsWith("#")) {
                     continue;
                 }
 
@@ -405,12 +425,12 @@ define(
                 // }
 
                 // skip empty lines
-                if ( chr.length < 3) {
+                if (chr.length < 3) {
                     continue;
                 }
 
 
-                if ( util.indexOf.call(chromosomes,chr) < 0){
+                if (util.indexOf.call(chromosomes, chr) < 0) {
                     chromosomes.push(chr);
                 }
 
@@ -419,15 +439,15 @@ define(
             return chromosomes.sort(util.sortAlphaNum);
         };
 
-        Karyotype.prototype.getChromosomeSizes = function() {
-            var size={};
-             var data = this.getBands();
-             for(var i = 0; i < data.length; i++){
+        Karyotype.prototype.getChromosomeSizes = function () {
+            var size = {};
+            var data = this.getBands();
+            for (var i = 0; i < data.length; i++) {
 
 
                 var chr = data[i][0];
 
-                if ( chr.startsWith("#") ) {
+                if (chr.startsWith("#")) {
                     continue;
                 }
 
@@ -437,31 +457,31 @@ define(
                 // }
 
                 // skip empty lines
-                if ( chr.length < 3) {
+                if (chr.length < 3) {
                     continue;
                 }
 
                 var max = parseInt(data[i][2]);
 
-                if ( typeof size[chr] === 'undefined'){
+                if (typeof size[chr] === 'undefined') {
 
 
                     size[chr] = max;
                 } else {
-                    if ( max > size[chr]) {
+                    if (max > size[chr]) {
 
                         size[chr] = max;
                     }
                 }
 
-             }
+            }
 
-             return size;
+            return size;
 
         };
 
 
-        Karyotype.prototype.createGradient = function(i,col){
+        Karyotype.prototype.createGradient = function (i, col) {
             var gradient = util.makeElementNS(NS_SVG, 'linearGradient', null, {
                 id: 'myGradient' + this.chr + '_' + i,
                 x1: 0,
@@ -475,15 +495,15 @@ define(
 
             var stop1 = util.makeElementNS(NS_SVG, 'stop', null, {
                 id: 'start' + this.chr + '_' + i,
-                'offset':     '50%',
+                'offset': '50%',
                 'stop-color': col
             });
 
             gradient.appendChild(stop1);
 
             var stop2 = util.makeElementNS(NS_SVG, 'stop', null, {
-                id: 'stop' + this.chr + '_' +i,
-                'offset':    '100%',
+                id: 'stop' + this.chr + '_' + i,
+                'offset': '100%',
                 'stop-color': karyo_palette.gradient
             });
 
@@ -496,14 +516,14 @@ define(
             this.svg.appendChild(defs);
         };
 
-        Karyotype.prototype.createBox = function(k, bmin, bmax, col,fill){
+        Karyotype.prototype.createBox = function (k, bmin, bmax, col, fill) {
 
 
             var y = this.y;
 
             var height = this.trackHeight + 6;
 
-            if (k.label === 'stalk' || k.label === 'acen'){
+            if (k.label === 'stalk' || k.label === 'acen') {
 
                 y = this.y + this.trackHeight / 4;
 
@@ -525,11 +545,11 @@ define(
             return rect;
         };
 
-        Karyotype.prototype.getColors = function(){
+        Karyotype.prototype.getColors = function () {
             return karyo_palette;
         };
 
-        Karyotype.prototype.numberWithCommas = function(x){
+        Karyotype.prototype.numberWithCommas = function (x) {
 
             x = x.toString();
             var pattern = /(-?\d+)(\d{3})/;
@@ -540,28 +560,27 @@ define(
 
         };
 
-        Karyotype.prototype.createLeftBox = function(k, bmin, bmax, col,fill){
+        Karyotype.prototype.createLeftBox = function (k, bmin, bmax, col, fill) {
 
-            var width = (bmax-bmin);
+            var width = (bmax - bmin);
             var radius = 5;
-            if ( width - radius <=0) {
+            if (width - radius <= 0) {
                 radius = width - 1;
             }
-            if ( radius < 1 ) {
+            if (radius < 1) {
                 radius = 1;
             }
 
-            var path = this.leftBoundedRect(bmin,this.y, width,6+ this.trackHeight,radius);
+            var path = this.leftBoundedRect(bmin, this.y, width, 6 + this.trackHeight, radius);
 
             var height = (k.label === 'stalk' ||
-                    k.label === 'acen' ? 11 : 6+this.trackHeight);
-
+            k.label === 'acen' ? 11 : 6 + this.trackHeight);
 
 
             var rect = util.makeElementNS(NS_SVG, 'path', null, {
                 d: path,
                 x: bmin,
-                y: (k.label === 'stalk' || k.label === 'acen' ? this.y+5 : this.y),
+                y: (k.label === 'stalk' || k.label === 'acen' ? this.y + 5 : this.y),
                 width: (bmax - bmin),
                 height: height,
                 fill: fill,
@@ -572,30 +591,29 @@ define(
             });
 
 
-
             return rect;
         };
 
-        Karyotype.prototype.createRightBox = function(k, bmin, bmax, col,fill){
+        Karyotype.prototype.createRightBox = function (k, bmin, bmax, col, fill) {
 
-            var width = (bmax-bmin);
+            var width = (bmax - bmin);
             var radius = 5;
-            if ( width - radius <0) {
+            if (width - radius < 0) {
                 radius = width - 1;
             }
-            if ( radius < 1 ) {
+            if (radius < 1) {
                 radius = 1;
             }
 
-            var path = this.rightBoundedRect(bmin,this.y, width,6+this.trackHeight,radius);
+            var path = this.rightBoundedRect(bmin, this.y, width, 6 + this.trackHeight, radius);
 
             var height = (k.label === 'stalk' ||
-                k.label === 'acen' ? 11 : 6+this.trackHeight);
+            k.label === 'acen' ? 11 : 6 + this.trackHeight);
 
             var rect = util.makeElementNS(NS_SVG, 'path', null, {
                 d: path,
                 x: bmin,
-                y: (k.label === 'stalk' || k.label === 'acen' ? this.y+5 : this.y),
+                y: (k.label === 'stalk' || k.label === 'acen' ? this.y + 5 : this.y),
                 width: (bmax - bmin),
                 height: height,
                 fill: fill,
@@ -609,12 +627,12 @@ define(
             return rect;
         };
 
-        Karyotype.prototype.rightBoundedRect = function(x,y,width,height, radius){
-            return  this.roundedRect(x,y,width,height,radius,false,true,false,true);
+        Karyotype.prototype.rightBoundedRect = function (x, y, width, height, radius) {
+            return this.roundedRect(x, y, width, height, radius, false, true, false, true);
         };
 
-        Karyotype.prototype.leftBoundedRect = function(x,y,width,height, radius){
-            return  this.roundedRect(x,y,width,height,radius,true,false,true,false);
+        Karyotype.prototype.leftBoundedRect = function (x, y, width, height, radius) {
+            return this.roundedRect(x, y, width, height, radius, true, false, true, false);
         };
 
         /*
@@ -628,53 +646,75 @@ define(
          bl: bottom_left rounded?
          br: bottom_right rounded?
          */
-        Karyotype.prototype.roundedRect = function(x, y, w, h, r, tl, tr, bl, br) {
+        Karyotype.prototype.roundedRect = function (x, y, w, h, r, tl, tr, bl, br) {
             var retval;
-            retval  = "M" + (x + r) + "," + y;
-            retval += "h" + (w - 2*r);
-            if (tr) { retval += "a" + r + "," + r + " 0 0 1 " + r + "," + r; }
-            else { retval += "h" + r; retval += "v" + r; }
-            retval += "v" + (h - 2*r);
-            if (br) { retval += "a" + r + "," + r + " 0 0 1 " + -r + "," + r; }
-            else { retval += "v" + r; retval += "h" + -r; }
-            retval += "h" + (2*r - w);
-            if (bl) { retval += "a" + r + "," + r + " 0 0 1 " + -r + "," + -r; }
-            else { retval += "h" + -r; retval += "v" + -r; }
-            retval += "v" + (2*r - h);
-            if (tl) { retval += "a" + r + "," + r + " 0 0 1 " + r + "," + -r; }
-            else { retval += "v" + -r; retval += "h" + r; }
+            retval = "M" + (x + r) + "," + y;
+            retval += "h" + (w - 2 * r);
+            if (tr) {
+                retval += "a" + r + "," + r + " 0 0 1 " + r + "," + r;
+            }
+            else {
+                retval += "h" + r;
+                retval += "v" + r;
+            }
+            retval += "v" + (h - 2 * r);
+            if (br) {
+                retval += "a" + r + "," + r + " 0 0 1 " + -r + "," + r;
+            }
+            else {
+                retval += "v" + r;
+                retval += "h" + -r;
+            }
+            retval += "h" + (2 * r - w);
+            if (bl) {
+                retval += "a" + r + "," + r + " 0 0 1 " + -r + "," + -r;
+            }
+            else {
+                retval += "h" + -r;
+                retval += "v" + -r;
+            }
+            retval += "v" + (2 * r - h);
+            if (tl) {
+                retval += "a" + r + "," + r + " 0 0 1 " + r + "," + -r;
+            }
+            else {
+                retval += "v" + -r;
+                retval += "h" + r;
+            }
             retval += "z";
             return retval;
         };
 
-        Karyotype.prototype.drawDataTrack = function(){
-             if (typeof this.dataTrack === 'undefined') {
-                 return;
-             }
-             var data = this.dataTrack.getData();
-             if ( ! data.header) {
-                 return;
-             }
+        Karyotype.prototype.drawDataTrack = function () {
+            if (typeof this.dataTrack === 'undefined') {
+                return;
+            }
+            var data = this.dataTrack.getData();
+            if (!data.header) {
+                return;
+            }
 
-             if (! this.dataTrackAdded ) {
-                 this.dataTrackAdded = true;
-                 this.y += this.dataTrackHeight;
-             }
-             this.dataTrack.redraw(this.svg,this.y, this.dataTrackHeight);
+            if (!this.dataTrackAdded) {
+                this.dataTrackAdded = true;
+                this.y += this.dataTrackHeight;
+            }
+            this.dataTrack.redraw(this.svg, this.y, this.dataTrackHeight);
 
 
         };
 
-        Karyotype.prototype.toScreenCoords = function(genomicCoods){
-            return ( this.padding+((1.0 * genomicCoods) / this.chrLen) * this.width );
+        Karyotype.prototype.toScreenCoords = function (genomicCoods) {
+
+            return ( this.leftSpace+ this.padding +
+                (( (1.0 * genomicCoods)) / this.chrLen) * (this.width - this.leftSpace));
         };
 
-        Karyotype.prototype.redraw = function() {
+        Karyotype.prototype.redraw = function () {
 
             util.removeChildren(this.svg);
 
-            this.karyos = this.karyos.sort(function(k1, k2) {
-                return (k1.min|0) - (k2.min|0);
+            this.karyos = this.karyos.sort(function (k1, k2) {
+                return (k1.min | 0) - (k2.min | 0);
             });
             if (this.karyos.length > 0) {
                 if (!this.chrLen) {
@@ -697,6 +737,16 @@ define(
                 this.drawDataTrack();
             }
 
+            // draw Name of chromosome
+            if (this.showName) {
+                var textNodeL = document.createTextNode(this.chr);
+                this.svg.append(textNodeL);
+                var txtR = util.createText(this.description,  0, this.y + 12);
+                txtR.appendChild(textNodeL);
+                this.svg.append(txtR);
+
+            }
+
             var bandspans = null;
 
             for (var i = 0; i < this.karyos.length; ++i) {
@@ -707,7 +757,7 @@ define(
 
                 if (!col) {
                     col = karyo_palette[k.id];
-                    k.label=k.id;
+                    k.label = k.id;
                 }
 
                 if (!col) {
@@ -717,31 +767,31 @@ define(
                 } else {
                     if (bmax > bmin) {
 
-                        this.createGradient(i,col);
+                        this.createGradient(i, col);
 
-                        var fill = 'url(#myGradient'+ this.chr + '_'  + i+')';
+                        var fill = 'url(#myGradient' + this.chr + '_' + i + ')';
 
                         var box;
 
-                        var nextIsStalk = ( i < this.karyos.length -1  &&
-                            ( this.karyos[i+1].label === 'stalk' ||
-                            this.karyos[i+1].label === 'acen' ));
+                        var nextIsStalk = ( i < this.karyos.length - 1 &&
+                        ( this.karyos[i + 1].label === 'stalk' ||
+                        this.karyos[i + 1].label === 'acen' ));
 
                         var isStalk = (this.karyos[i].label === 'stalk' ||
-                            this.karyos[i].label === 'acen' );
+                        this.karyos[i].label === 'acen' );
 
-                        var prevWasStalk = ( i > 0  &&
-                            ( this.karyos[i-1].label === 'stalk' ||
-                            this.karyos[i-1].label === 'acen' ));
+                        var prevWasStalk = ( i > 0 &&
+                        ( this.karyos[i - 1].label === 'stalk' ||
+                        this.karyos[i - 1].label === 'acen' ));
 
 
-                        if ( i === 0 ) {
+                        if (i === 0) {
                             box = this.createLeftBox(k, bmin, bmax, col, fill);
-                        } else if  ( i === (this.karyos.length - 1)) {
-                            box = this.createRightBox(k, bmin, bmax, col,fill);
-                        } else if ( ! isStalk && nextIsStalk ) {
+                        } else if (i === (this.karyos.length - 1)) {
                             box = this.createRightBox(k, bmin, bmax, col, fill);
-                        } else if ( ! isStalk && prevWasStalk) {
+                        } else if (!isStalk && nextIsStalk) {
+                            box = this.createRightBox(k, bmin, bmax, col, fill);
+                        } else if (!isStalk && prevWasStalk) {
                             box = this.createLeftBox(k, bmin, bmax, col, fill);
                         } else {
                             box = this.createBox(k, bmin, bmax, col, fill);
@@ -752,10 +802,10 @@ define(
                             chrNr = this.chr.substring(3);
                         }
                         $(box).tooltip({
-                            'title':chrNr + k.id + ' ' +
+                            'title': chrNr + k.id + ' ' +
                             this.numberWithCommas(k.min) + ' - ' +
                             this.numberWithCommas(k.max),
-                            'container':'body'
+                            'container': 'body'
                         });
                         $(box).css('cursor', 'pointer');
 
@@ -790,7 +840,7 @@ define(
 
 
             var that = this;
-            this.labels.forEach(function(label){
+            this.labels.forEach(function (label) {
 
                 label.redraw(that.svg, that.y + that.trackHeight + 6);
             });
@@ -798,14 +848,14 @@ define(
         };
 
 
-        Karyotype.prototype.createBandClickedEvent = function(k){
+        Karyotype.prototype.createBandClickedEvent = function (k) {
             var that = this;
-            return function (event ) {
+            return function (event) {
 
 
                 var pos = $(that.realParent).offset();
 
-                var x = event.clientX -4;
+                var x = event.clientX - 4;
 
                 var width = that.width;
                 var chrLen = that.chrLen;
@@ -814,39 +864,41 @@ define(
 
                 var seqPos = Math.round(trueX / width * chrLen);
 
-                that._dispatchEvent({'name':'bandClickedEvent'},
-                    'bandClicked',{ 'min': seqPos,
-                     'max': (seqPos + width),
-                     'chrLen':that.chrLen,
-                     'chr' : that.chr,
-                     'band':k});
+                that._dispatchEvent({'name': 'bandClickedEvent'},
+                    'bandClicked', {
+                        'min': seqPos,
+                        'max': (seqPos + width),
+                        'chrLen': that.chrLen,
+                        'chr': that.chr,
+                        'band': k
+                    });
             };
         };
 
-        Karyotype.prototype.createMouseOverBandEvent = function(k){
+        Karyotype.prototype.createMouseOverBandEvent = function (k) {
             var that = this;
             return function () {
-                that._dispatchEvent({'name':'mouseOverBandEvent'},
-                    'mouseOverBand',k);
+                that._dispatchEvent({'name': 'mouseOverBandEvent'},
+                    'mouseOverBand', k);
             };
         };
 
-        Karyotype.prototype.initThumb = function() {
+        Karyotype.prototype.initThumb = function () {
 
-            if ( ! this.thumbEnabled){
+            if (!this.thumbEnabled) {
                 return;
             }
 
             this.thumb = util.makeElementNS(NS_SVG, 'rect', null, {
-                id:'thumb' + this.chr,
+                id: 'thumb' + this.chr,
                 x: 50,
-                y: this.y-this.thumbSpacer,
+                y: this.y - this.thumbSpacer,
                 width: this.thumbWidth,
-                height: this.y+this.trackHeight + this.thumbSpacer *2 ,
+                height: this.y + this.trackHeight + this.thumbSpacer * 2,
                 fill: thumbColor,
                 stroke: thumbStroke,
-                strokewidth:1,
-                opacity:0.7
+                strokewidth: 1,
+                opacity: 0.7
             });
 
             $(this.thumb).css('cursor', 'col-resize');
@@ -859,17 +911,19 @@ define(
             var sliderDeltaX;
 
             var that = this;
-            var moveHandler = function(ev) {
-                ev.stopPropagation(); ev.preventDefault();
+            var moveHandler = function (ev) {
+                ev.stopPropagation();
+                ev.preventDefault();
                 var sliderX = Math.max(-4, Math.min(ev.clientX + sliderDeltaX,
                     thisKaryo.width - 4));
                 thisKaryo.thumb.setAttribute('x', sliderX);
             };
-            var upHandler = function(ev) {
-                ev.stopPropagation(); ev.preventDefault();
+            var upHandler = function (ev) {
+                ev.stopPropagation();
+                ev.preventDefault();
                 if (thisKaryo.onchange) {
 
-                    var val = (thisKaryo.thumb.getAttribute('x')|0);
+                    var val = (thisKaryo.thumb.getAttribute('x') | 0);
 
                     thisKaryo.onchange((1.0 * (val + 4)) / thisKaryo.width, true);
                 }
@@ -878,22 +932,26 @@ define(
 
                 // at what sequence position did the slider get released?
 
-                var xval = (thisKaryo.thumb.getAttribute('x')|0);
-                var start =   Math.round(xval / thisKaryo.width * thisKaryo.chrLen) ;
+                var xval = (thisKaryo.thumb.getAttribute('x') | 0) ;
+
+                xval = xval - thisKaryo.leftSpace;
+
+                var start = Math.round(xval / thisKaryo.width * thisKaryo.chrLen);
 
                 //console.log(start + " " + thisKaryo.chrLen + " " + thisKaryo.chrLen * start ) ;
 
-                var width = thisKaryo.thumb.getAttribute('width')|1;
+                var width = thisKaryo.thumb.getAttribute('width') | 1;
 
                 var end = Math.round(start + (width / thisKaryo.width * thisKaryo.chrLen));
 
-                that._dispatchEvent({'name':'sliderMovedEvent'},
-                    'sliderMoved', {'min':start,'max': end, 'chr': thisKaryo.chr});
+                that._dispatchEvent({'name': 'sliderMovedEvent'},
+                    'sliderMoved', {'min': start, 'max': end, 'chr': thisKaryo.chr});
             };
 
-            this.thumb.addEventListener('mousedown', function(ev) {
-                ev.stopPropagation(); ev.preventDefault();
-                sliderDeltaX = thisKaryo.thumb.getAttribute('x') - ev.clientX;
+            this.thumb.addEventListener('mousedown', function (ev) {
+                ev.stopPropagation();
+                ev.preventDefault();
+                sliderDeltaX = thisKaryo.thumb.getAttribute('x') - ev.clientX ;
                 document.addEventListener('mousemove', moveHandler, true);
                 document.addEventListener('mouseup', upHandler, true);
             }, false);
@@ -902,16 +960,16 @@ define(
         };
 
         /** enable/disable the display of the "thumb", which displays a currently selected region.
-        */
-        Karyotype.prototype.showThumb = function(flag) {
+         */
+        Karyotype.prototype.showThumb = function (flag) {
 
             this.thumbEnabled = flag;
 
-            if (flag && ( ! this.thumb)) {
+            if (flag && ( !this.thumb)) {
                 this.initThumb();
             }
 
-            if ( ! flag && this.thumb){
+            if (!flag && this.thumb) {
                 this.svg.removeChild(this.thumb);
                 this.thumb = undefined;
 
@@ -921,24 +979,25 @@ define(
         };
 
         /** update the position of the "thumb".
-        */
-        Karyotype.prototype.setThumb = function() {
+         */
+        Karyotype.prototype.setThumb = function () {
 
-            if ( ! this.thumbEnabled){
+            if (!this.thumbEnabled) {
                 return;
             }
 
-            if ( ! this._initialized) {
+            if (!this._initialized) {
                 return;
             }
 
-            var pos = (this.start|0) ;
+            //var pos = (this.start | 0);
 
-            var gpos = Math.round(((1.0 * pos)/this.chrLen) * this.width);
+            //var gpos = Math.round(((1.0 * pos) / this.chrLen) * this.width);
+            var gpos = this.toScreenCoords(this.start);
 
-            var w = Math.round((this.end|0 - this.start|0) / this.chrLen * this.width);
+            var w = Math.round((this.end | 0 - this.start | 0) / this.chrLen * this.width);
 
-            if ( w < 5) {
+            if (w < 5) {
                 w = 5;
             }
 
@@ -946,7 +1005,7 @@ define(
             //             this.chrLen  + " start " + this.start + " this.thumb: " + this.thumb);
             if (this.thumb) {
 
-                this.thumb.setAttribute('x', gpos );
+                this.thumb.setAttribute('x', gpos);
 
                 this.thumb.setAttribute('width', w);
 
@@ -954,24 +1013,24 @@ define(
         };
 
         /** allows to set the scale of this karyotype image. This can be used when showing
-            multiple karyotypes on the same page.
+         multiple karyotypes on the same page.
 
-            Chr1 would be 100% of the scale, and each other chromosome can get scaled
-            down relative to its size.
+         Chr1 would be 100% of the scale, and each other chromosome can get scaled
+         down relative to its size.
 
-            Percent is a number between 0 and 1;
-        */
-        Karyotype.prototype.setScale = function(percent){
+         Percent is a number between 0 and 1;
+         */
+        Karyotype.prototype.setScale = function (percent) {
 
-            if ( percent < 0) {
+            if (percent < 0) {
                 console.error("scale has to be a value between 0 and 1");
                 percent = 1;
             }
 
-            if ( percent > 1) {
+            if (percent > 1) {
                 console.error("scale has to be a value between 0 and 1");
                 // prob a user input error
-                if ( percent <=100) {
+                if (percent <= 100) {
                     percent = percent / 100;
                 } else {
 
@@ -983,26 +1042,31 @@ define(
 
         };
 
-        Karyotype.prototype.getScale = function(){
+        Karyotype.prototype.getScale = function () {
             return this.scale;
         };
 
-         Karyotype.prototype.getPadding = function(){
+        Karyotype.prototype.getPadding = function () {
             return this.padding;
         };
 
-         Karyotype.prototype.getWidth = function(){
+        Karyotype.prototype.getWidth = function () {
             return this.width;
         };
 
         Karyotype.prototype.updateScale = function () {
 
+            this.leftSpace = 0;
+            if (this.showName) {
+                this.leftSpace = 40;
+            }
+
             var availWidth = this.getPreferredWidth() - this.padding * 2;
-            if ( availWidth < 2) {
+            if (availWidth < 2) {
                 return;
             }
 
-            this.width = availWidth * this.scale ;
+            this.width = availWidth * this.scale;
 
             //$(this.parent).css('overflow', 'auto');
             //$(this.parent).css('width', $(this.realParent).width());
@@ -1012,16 +1076,16 @@ define(
             this.resetSVG();
             this.setParent(this.realParent);
 
-            $(this.svg).attr("width",this.width+this.padding * 2);
+            $(this.svg).attr("width", this.width + this.padding * 2);
             this.redraw();
 
         };
 
         Karyotype.prototype.getPreferredWidth = function () {
 
-            var availWidth = $(this.realParent).width() ;
+            var availWidth = $(this.realParent).width();
 
-            if( availWidth < 1){
+            if (availWidth < 1) {
                 console.error("something is wrong with this page");
                 return 1;
             }
@@ -1029,7 +1093,7 @@ define(
 
         };
 
-        Karyotype.prototype.addDataTrack = function(url){
+        Karyotype.prototype.addDataTrack = function (url) {
 
             this.dataTrack = new datatrack.DataTrack(this);
             this.dataTrack.setURL(url);
@@ -1038,7 +1102,7 @@ define(
 
 
         return {
-            Karyotype : function(elem, options){
+            Karyotype: function (elem, options) {
                 return new Karyotype(elem, options);
             }
 

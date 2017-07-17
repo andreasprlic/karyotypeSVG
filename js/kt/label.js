@@ -44,12 +44,12 @@ define(
             var x = this.karyotype.toScreenCoords(this.start);
             var w = this.karyotype.toScreenCoords(this.stop) - x;
 
-            // minimum 10 px otherwise no point in drawing
-            if ( w < 10) {
-                w = 10;
+            // minimum 5 px otherwise no point in drawing
+            if ( w < 5) {
+                w = 5;
             }
 
-            // too close to right enge is not visible..
+            // too close to right edge is not visible..
             var maxX = this.karyotype.toScreenCoords(this.karyotype.chrLen);
             if ( maxX - x < 10) {
                 x = maxX - 10;
@@ -108,7 +108,7 @@ define(
                     strokewidth: 1
                 });
 
-                var txt = this.createText(this.description,xm + 35, ly + 10);
+                var txt = util.createText(this.description,xm + 35, ly + 10);
                 var textNode = document.createTextNode(this.description);
                 txt.appendChild(textNode);
                 svg.append(txt);
@@ -126,42 +126,15 @@ define(
                 var textNodeL = document.createTextNode(this.description);
                  svg.append(textNodeL);
 
-                var txtR = this.createText(this.description,xm - 35 , ly + 10);
+                var txtR = util.createText(this.description,xm - 35 , ly + 10);
                 txtR.appendChild(textNodeL);
                 svg.append(txtR);
 
-                var textL = this.getTextNodeWidth(textNodeL);
+                var textL = util.getTextNodeWidth(textNodeL);
                 txtR.setAttributeNS(null,"x",(xm - 35 - textL));
             }
             svg.appendChild(rectl);
 
-        };
-
-        Label.prototype.createText = function(text,x,y){
-            var newText = document.createElementNS(NS_SVG,"text");
-            newText.setAttributeNS(null,"x",x);
-            newText.setAttributeNS(null,"y",y);
-
-            return newText;
-        };
-
-        Label.prototype.getTextNodeWidth = function(textNode) {
-            var width = 0;
-            var range, rect;
-
-            if (document.createRange) {
-                range = document.createRange();
-                if (range.getBoundingClientRect) {
-                    range.selectNodeContents(textNode);
-                    rect = range.getBoundingClientRect();
-                    console.log(rect);
-                    if (rect) {
-                        width = rect.right - rect.left;
-                    }
-                }
-            }
-
-            return width;
         };
 
         return {

@@ -83,16 +83,13 @@ define(
          */
         DataTrack.prototype.redraw = function (svg, y, trackHeight){
 
-            
-            
-
             // the incoming y is for the karyotype. Since we draw on top,
             // need to take the track height off
             var baseline = y - trackHeight;
 
             var maxHeight = this.data.header.max;
 
-            var spacer = 2;
+            var spacer = 0;
             
             var heightScale = (trackHeight - spacer) / maxHeight;
 

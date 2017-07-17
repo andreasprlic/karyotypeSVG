@@ -120,13 +120,7 @@ require(['kt/main'], function(KT){
 
     	var div = $("#ktContainer").append("<div id='row"+chr+"' class='row'>");
 
-    	$("#row"+chr).append("<p id='label"+chr+"' class='col-sm-1 text-right'>");
-
-    	$("#label"+chr).append("<label> " + chr + " </label>");
-
-		$("#row"+chr).append("<div id='kt"+chr+"' class='col-sm-11'>");
-
-    	$("#kt"+chr).append("<div id='div"+chr+"'>");
+    	$("#row"+chr).append("<div id='div"+chr+"'>");
 
  		var newkt = new karyotypesvg.KT();
 

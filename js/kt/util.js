@@ -1,56 +1,56 @@
 /*jshint unused: false */
 
 
-define(function(require)
-{
+define(function (require) {
 
     var exports = {};
 
     var attr_name_cache = {};
 
-    var pako   = require('pako');
+    var pako = require('pako');
 
-    exports.indexOf = function(needle) {
-    
-    var indexOf;
+    var NS_SVG = 'http://www.w3.org/2000/svg';
 
-    if(typeof Array.prototype.indexOf === 'function') {
-        indexOf = Array.prototype.indexOf;
-    } else {
-        indexOf = function(needle) {
-            var i = -1, index = -1;            
-            for(i = 0; i < this.length; i++) {
-                if(this[i] === needle) {
-                    index = i;
-                    break;
+    exports.indexOf = function (needle) {
+
+        var indexOf;
+
+        if (typeof Array.prototype.indexOf === 'function') {
+            indexOf = Array.prototype.indexOf;
+        } else {
+            indexOf = function (needle) {
+                var i = -1, index = -1;
+                for (i = 0; i < this.length; i++) {
+                    if (this[i] === needle) {
+                        index = i;
+                        break;
+                    }
                 }
-            }
 
-            return index;
-        };
-    }
+                return index;
+            };
+        }
 
-    return indexOf.call(this, needle);
-};
-
+        return indexOf.call(this, needle);
+    };
 
 
-    exports.endsWith = function(str, suffix) {
+    exports.endsWith = function (str, suffix) {
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     };
 
-    
-    exports.isNumber = function(n){
+
+    exports.isNumber = function (n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     };
 
     var reA = /[^a-zA-Z]/g;
     var reN = /[^0-9]/g;
-    
-    exports.sortAlphaNum = function(a,b) {
+
+    exports.sortAlphaNum = function (a, b) {
         var aA = a.replace(reA, "");
         var bA = b.replace(reA, "");
-        if(aA === bA) {
+        if (aA === bA) {
             var aN = parseInt(a.replace(reN, ""), 10);
             var bN = parseInt(b.replace(reN, ""), 10);
             return aN === bN ? 0 : aN > bN ? 1 : -1;
@@ -59,7 +59,7 @@ define(function(require)
         }
     };
 
-    exports.setAttr = function(node, key, value) {
+    exports.setAttr = function (node, key, value) {
         var attr = attr_name_cache[key];
         if (!attr) {
             var _attr = '';
@@ -126,7 +126,7 @@ define(function(require)
     };
 
 
-    exports.makeElementNS = function(namespace, tag, children, attribs) {
+    exports.makeElementNS = function (namespace, tag, children, attribs) {
         var ele = document.createElementNS(namespace, tag);
         if (children) {
             if (!(children instanceof Array)) {
@@ -146,7 +146,7 @@ define(function(require)
     };
 
 
-    exports.removeChildren = function(node) {
+    exports.removeChildren = function (node) {
         if (!node || !node.childNodes) {
             return;
         }
@@ -157,13 +157,12 @@ define(function(require)
     };
 
     var timer = null;
-    exports.makeTooltip = function(ele, text, popupHolder)
-    {
+    exports.makeTooltip = function (ele, text, popupHolder) {
         var isin = false;
         var thisB = this;
 
         var outlistener;
-        outlistener = function(ev) {
+        outlistener = function (ev) {
             isin = false;
             if (timer) {
                 clearTimeout(timer);
@@ -173,13 +172,13 @@ define(function(require)
         };
 
         var setup;
-        setup = function(ev) {
+        setup = function (ev) {
 
             var mx = ev.clientX + window.scrollX, my = ev.clientY + window.scrollY;
 
             if (!timer) {
                 var that = this;
-                timer = setTimeout(function() {
+                timer = setTimeout(function () {
                     var popup = exports.makeElement('div', text, {}, {
                         position: 'absolute',
                         top: '' + (my + 20) + 'px',
@@ -194,7 +193,7 @@ define(function(require)
 
                     popupHolder.appendChild(popup);
                     var moveHandler;
-                    moveHandler = function(ev) {
+                    moveHandler = function (ev) {
                         try {
                             popupHolder.removeChild(popup);
                         } catch (e) {
@@ -215,12 +214,12 @@ define(function(require)
             }
         };
 
-        ele.addEventListener('mouseover', function(ev) {
+        ele.addEventListener('mouseover', function (ev) {
             isin = true;
             ele.addEventListener('mouseout', outlistener, false);
             setup(ev);
         }, false);
-        ele.addEventListener('DOMNodeRemovedFromDocument', function(ev) {
+        ele.addEventListener('DOMNodeRemovedFromDocument', function (ev) {
             isin = false;
             if (timer) {
                 clearTimeout(timer);
@@ -229,34 +228,60 @@ define(function(require)
         }, false);
     };
 
-    exports.gzipSuccessFunction = function(result){
+    exports.createText = function(text,x,y){
+            var newText = document.createElementNS(NS_SVG,"text");
+            newText.setAttributeNS(null,"x",x);
+            newText.setAttributeNS(null,"y",y);
 
-            try {
-                // we need to convert the response to binary
-                var bytes = [];
+            return newText;
+        };
 
-                for (var i = 0; i < result.length; ++i)
-                {
-                    bytes.push(result.charCodeAt(i));
+    exports.getTextNodeWidth = function (textNode) {
+        var width = 0;
+        var range, rect;
+
+        if (document.createRange) {
+            range = document.createRange();
+            if (range.getBoundingClientRect) {
+                range.selectNodeContents(textNode);
+                rect = range.getBoundingClientRect();
+                console.log(rect);
+                if (rect) {
+                    width = rect.right - rect.left;
                 }
+            }
+        }
 
-                var binData     = new Uint8Array(bytes);
+        return width;
+    };
 
-                // now we use the pako library to uncompress the binary response
-                var pdata     = pako.inflate(binData);
+    exports.gzipSuccessFunction = function (result) {
 
-                // and convert the uncompressed data back to string
-                var data     = String.fromCharCode.apply(null,
-                    new Uint16Array(pdata));
+        try {
+            // we need to convert the response to binary
+            var bytes = [];
 
-                return data;
-            } catch (err){
-                console.log(err);
-                // probably conent is already uncompressed
-                return result;
+            for (var i = 0; i < result.length; ++i) {
+                bytes.push(result.charCodeAt(i));
             }
 
-        };
+            var binData = new Uint8Array(bytes);
+
+            // now we use the pako library to uncompress the binary response
+            var pdata = pako.inflate(binData);
+
+            // and convert the uncompressed data back to string
+            var data = String.fromCharCode.apply(null,
+                new Uint16Array(pdata));
+
+            return data;
+        } catch (err) {
+            console.log(err);
+            // probably conent is already uncompressed
+            return result;
+        }
+
+    };
 
     return exports;
 });
